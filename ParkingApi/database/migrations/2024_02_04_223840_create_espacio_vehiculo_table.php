@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreign("id_espacio")->references("id")->on("espacio");
             $table->unsignedBigInteger("id_vehiculo");
             $table->foreign("id_vehiculo")->references("id")->on("vehiculo");
+            $table->primary("id_espacio");
             $table->timestamps();
         });
     }

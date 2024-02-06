@@ -2,7 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\VehiculoController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -13,9 +13,7 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::get("/", function(){
-    return response()->json(["a" => 1]);
-});
+Route::post("/vehiculo", [VehiculoController::class, "save"]);
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

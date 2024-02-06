@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('direccion', function (Blueprint $table) {
             $table->unsignedBigInteger("id_cliente");
+            $table->primary("id_cliente");
             $table->foreign('id_cliente')
             ->references('id')
             ->on('cliente')
