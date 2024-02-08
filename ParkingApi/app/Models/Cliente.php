@@ -11,7 +11,9 @@ class Cliente extends Model
 {
     use HasFactory;
     protected $table = "cliente";
+    protected $fillable = ["nombre", "apellido", "cedula", "telefono"];
+    protected $hidden = ["created_at", "updated_at"];
     public function vehiculo() : HasMany{
-        return $this->HasMany(Vehiculo::class);
+        return $this->hasMany(Vehiculo::class, "id_cliente");
     }
 }

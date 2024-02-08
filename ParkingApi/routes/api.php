@@ -13,18 +13,9 @@ use App\Http\Controllers\VehiculoController;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-Route::post("/vehiculo", [VehiculoController::class, "save"]);
-Route::post("/vehiculo/addrange", [VehiculoController::class, "AddRange"]);
-
-Route::get("/vehiculo", [VehiculoController::class, "GetPaginate"]);
-Route::get("/vehiculo/{id}", [VehiculoController::class, "GetById"]);
-
-Route::delete("/vehiculo/{id}", [VehiculoController::class, "Delete"]);
-Route::delete("/vehiculo", [VehiculoController::class, "DeleteRange"]);
-
-Route::put("/vehiculo/{id}", [VehiculoController::class, "Update"]);
-
-
+Route::get("ap/", function(){
+    return 1;
+});
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });

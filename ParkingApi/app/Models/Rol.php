@@ -9,4 +9,6 @@ class Rol extends Model
 {
     use HasFactory;
     protected $table = "rol";
+    protected $hidden = ["created_at", "updated_at"];
+
 }

@@ -3,16 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Models\Vehiculo;
+use App\Models\Tarifa;
 use Illuminate\Http\JsonResponse;
 use Exception;
 use Illuminate\Support\Facades\DB;
 
-class VehiculoController extends Controller
+class TarifaController extends Controller
 {
     public function Save(Request $request) : JsonResponse{
         try{
-            Vehiculo::create($request->all());
+            Tarifa::create($request->all());
             return response()->json(["data" => $request->all(), "status" => 201]);
         }catch(Exception $err){
             return response()->json(["error" => $err->getMessage(), "status" => 400]);
@@ -22,7 +22,7 @@ class VehiculoController extends Controller
     {
         try{
             $datos = DB::transaction(function () {
-                return Vehiculo::paginate(15);
+                return Tarifa::paginate(15);
             });
             return response()->json(["data" => $datos, "status" => 200]);
         }catch(Exception $err){
@@ -31,7 +31,7 @@ class VehiculoController extends Controller
     }
     public function GetById($id) : JsonResponse {
         try{
-            $datos = Vehiculo::findOrFail((int)$id);
+            $datos = Tarifa::findOrFail((int)$id);
             return response()->json(["data" => $datos, "status" => 200]);
         }catch(Exception $err){
             return response()->json(["error" => $err->getMessage(), "status" => 400]);
@@ -44,11 +44,11 @@ class VehiculoController extends Controller
                 $jsonData = $req->collect();
                 $data = json_decode($jsonData, true);
                     foreach($data as $key){
-                        Vehiculo::create(
+                        Tarifa::create(
                             [
-                                "placa" => $key["placa"],
                                 "id_tipo_vehiculo" => $key["id_tipo_vehiculo"],
-                                "id_cliente" => $key["id_cliente"]
+                                "tipo_tarifa" => $key["tipo_tarifa"],
+                                "precio_base" => $key["precio_base"]
                             ]
                         );
                     }
@@ -61,7 +61,7 @@ class VehiculoController extends Controller
     public function Delete($id) : JsonResponse
     {
         try{
-            Vehiculo::findOrFail($id)->delete();
+            Tarifa::findOrFail($id)->delete();
             return response()->json([ "status" => 204]);
         }catch(Exception $err){
             return response()->json(["error" => $err->getMessage(), "status" => 400]);
@@ -70,7 +70,7 @@ class VehiculoController extends Controller
     public function DeleteRange(Request $request) : JsonResponse
     {
         try{
-            Vehiculo::whereIn("id", $request->input("ids"))->delete();
+            Tarifa::whereIn("id", $request->input("ids"))->delete();
             return response()->json(["status" => 204]);
         }catch(Exception $err){
             return response()->json([
@@ -82,7 +82,7 @@ class VehiculoController extends Controller
     {
         try{
             DB::transaction(function () use($request,$id){
-                $datos = Vehiculo::findOrFail($id);
+                $datos = Tarifa::findOrFail($id);
                 $datos->update($request->all());
             });
             return response()->json(["status" => 200]);
@@ -91,11 +91,5 @@ class VehiculoController extends Controller
                 "error" => $err->getMessage(),
                 "status" => 400  ]);
         }
-    }
-    public function GetWithCliente() : JsonResponse{
-        $vehiculo = new Vehiculo();
-        $datos = $vehiculo->with("cliente")->get();
-
-        return response()->json(["datos" => $datos, "status" => 200]);
     }
 }
