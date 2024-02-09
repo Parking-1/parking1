@@ -20,7 +20,7 @@ return new class extends Migration
             $table->foreign('id_vehiculo')->references('id')->on('vehiculo');
             $table->dateTime("fecha_entrada");
             $table->dateTime("fecha_salida")->nullable();
-            $table->double("precio_total",15,2);
+            $table->double("precio_total",15,2)->nullable();
             $table->unsignedBigInteger("id_tarifa");
             $table->foreign('id_tarifa')->references('id')->on('tarifa');
             $table->timestamps();
