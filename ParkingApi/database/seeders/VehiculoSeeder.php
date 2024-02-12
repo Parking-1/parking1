@@ -16,7 +16,7 @@ class VehiculoSeeder extends Seeder
     public function run()
     {
           // Crear datos principales
-          Vehiculo::createMany(
+          Vehiculo::insert(
         [
             [
                 "placa" => "abc123",

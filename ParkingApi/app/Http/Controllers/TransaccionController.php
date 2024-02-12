@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 
 use App\Models\Transaccion;
+use App\Models\Espacio;
+
 use App\Models\Vehiculo;
 use App\Models\Tarifa;
 
@@ -29,38 +31,60 @@ class TransaccionController extends Controller
         }
         return $diff;
     }
+    // Creacion de transaccion
     public function Save(Request $request) : JsonResponse{
         try{
             $vehiculo  = Vehiculo::where("placa", $request->placa)->first();
             $dato      = Tarifa::findOrFail($request["id_tarifa"]);
-            $tipo_veh_vehiculo = $vehiculo->TipoVehiculo()->get()[0]->descripcion;
-            if($tipo_veh_vehiculo != $dato->TipoVehiculo()->get()[0]->descripcion){
-                throw new Exception("No coincide");
+            //verifica si el vehiculo existe y si lo hace realiza una busqueda del tipo de tarifa para ver si coincide con el tipo de vehiculo
+            if(isset($vehiculo)){
+                $tipo_veh_vehiculo = $vehiculo->TipoVehiculo()->get()[0]->descripcion;
+                if($tipo_veh_vehiculo != $dato->TipoVehiculo()->get()[0]->descripcion){
+                    throw new Exception("No coincide");
+                }
             }
-            DB::transaction(function ()  use($request, $vehiculo, $dato){
+            // una transaccion hacia la base de datos
+            DB::transaction(function ()  use($request, $vehiculo, $dato) : void{
                 $transaccion = new Transaccion();
+                // si existe el vehiculo el request del id vendra siendo la id del vehiculo encontrado
                 if(isset( $vehiculo) ){
                     $request["id_vehiculo"] = $vehiculo->id;
-                }else{
-                    $transaccion->vehiculo()->create(
+                    $tid = $vehiculo->id;
+                }
+                // sino se creara un nuevo vehiculo usando los datos pasados por body
+                else{
+                    // crea un nuevo vehiculo y lo guarda en la variable $t
+                    $t = $transaccion->vehiculo()->create(
                     [
                         "placa" => $request->placa,
                         "id_tipo_vehiculo" => $request["id_tipo_vehiculo"],
                         "id_cliente" => $request["id_cliente"]
                     ]);
-                    $request["id_vehiculo"] = $transaccion->vehiculo()->get()->id;
+                    // asigna la id del vehiculo creado en la variable $tid
+                    $tid = $t->id;
+                    // asigna la id del vehiculo en el request
+                    $request["id_vehiculo"] = $tid;
                 }
+                // verifica si existe la fecha de salida
                 if(isset( $request["fecha_salida"] ) ){
-
+                    // funcion que obtiene la diferencia entre dos fechas dependiendo del tipo de tarifa
                     $diff = $this->GetDateDiff([
                         "fecha_entrada" => $request["fecha_entrada"],
                         "fecha_salida" => $request["fecha_salida"],
                     ],
                     $dato["tipo_tarifa"]
             );
+                    // calculo para sacar el precio total
                     $request["precio_total"] = ((float)$diff) * $dato["precio_base"];
+
                 }
+                // crea la transaccion
                 $transaccion->create($request->all());
+                // busca el vehiculo que se creo o que esta directamente relacionado con esta transaccion
+                $vehiculo = Vehiculo::findOrFail($tid);
+                // asigna un espacio para dicho vehiculo
+                $idEspacio = Espacio::where("estado", "disponible")->first()->id;
+                $vehiculo->espacio()->sync([$idEspacio]);
             });
 
             return response()->json(["data" => $request->all(), "status" => 201]);

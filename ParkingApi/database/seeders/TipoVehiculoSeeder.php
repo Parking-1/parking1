@@ -15,7 +15,7 @@ class TipoVehiculoSeeder extends Seeder
      */
     public function run()
     {
-        TipoVehiculo::createMany([
+        TipoVehiculo::insert([
             ["descripcion" =>  "Moto"],
             ["descripcion" =>  "Carro"],
             ["descripcion" =>  "Camion"],

@@ -14,7 +14,7 @@ class RolSeeder extends Seeder
      */
     public function run()
     {
-        Rol::createMany([
+        Rol::insert([
             ["nombre" => "administrador"],
             ["nombre" => "empleado"]
         ]);

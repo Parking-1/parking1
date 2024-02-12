@@ -14,7 +14,7 @@ class CargoSeeder extends Seeder
      */
     public function run()
     {
-        Cargo::createMany([
+        Cargo::insert([
             ["nombre" => "vigilante"],
             ["nombre" => "administrador"],
             ["nombre" => "encargado"]
