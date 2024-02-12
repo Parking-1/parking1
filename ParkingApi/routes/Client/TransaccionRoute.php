@@ -11,6 +11,8 @@ Route::middleware(['api'])->prefix("transaccion")->group(function () {
 
     Route::get("/", [TransaccionController::class, "GetPaginate"]);
     Route::get("/{id}", [TransaccionController::class, "GetById"]);
+    Route::get("/betweeen/vehiculo", [TransaccionController::class, "GetBetween"]);
+
 
     Route::delete("/{id}", [TransaccionController::class, "Delete"]);
     Route::delete("/", [TransaccionController::class, "DeleteRange"]);

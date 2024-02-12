@@ -95,7 +95,20 @@ class VehiculoController extends Controller
     public function GetWithCliente() : JsonResponse{
         $vehiculo = new Vehiculo();
         $datos = $vehiculo->with("cliente")->get();
-
         return response()->json(["datos" => $datos, "status" => 200]);
+    }
+    public function GetGroupVehiculos() : JsonResponse{
+        try{
+            $vehiculos = new Vehiculo();
+            $vehiculos = $vehiculos
+            ->join("tipo_vehiculo", "vehiculo.id_tipo_vehiculo","=", "tipo_vehiculo.id")
+            ->select(DB::raw("tipo_vehiculo.descripcion ,count(*) as total"))
+            ->groupBy("tipo_vehiculo.descripcion")
+            ->get();
+
+            return response()->json(["datos" => $vehiculos, "status" => 200]);
+        }catch(Exception $err){
+            return response()->json(["error" => $err->getMessage(), "status" => 400]);
+        }
     }
 }

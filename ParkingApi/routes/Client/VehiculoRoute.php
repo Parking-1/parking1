@@ -12,6 +12,8 @@ Route::middleware(['api'])->prefix("vehiculo")->group(function () {
     Route::get("/", [VehiculoController::class, "GetPaginate"]);
     Route::get("/{id}", [VehiculoController::class, "GetById"]);
     Route::get("/relac/get", [VehiculoController::class, "GetWithCliente"]);
+    Route::get("/group/get", [VehiculoController::class, "GetGroupVehiculos"]);
+
 
     Route::delete("/{id}", [VehiculoController::class, "Delete"]);
     Route::delete("/", [VehiculoController::class, "DeleteRange"]);

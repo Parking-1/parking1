@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\TipoVehiculo;
+use App\Models\Transaccion;
+
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Tarifa extends Model
@@ -16,5 +18,9 @@ class Tarifa extends Model
 
     public function tipoVehiculo() : BelongsTo {
         return $this->belongsTo(TipoVehiculo::class, "id_tipo_vehiculo");
+    }
+
+    public function transaccion() : HasMany {
+        return $this->hasMany(Transaccion::class, "id_tarifa");
     }
 }
