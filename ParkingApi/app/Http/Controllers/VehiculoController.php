@@ -102,7 +102,10 @@ class VehiculoController extends Controller
             $vehiculos = new Vehiculo();
             $vehiculos = $vehiculos
             ->join("tipo_vehiculo", "vehiculo.id_tipo_vehiculo","=", "tipo_vehiculo.id")
+            ->join("espacio_vehiculo", "espacio_vehiculo.vehiculo_id", "=", "vehiculo.id")
+            ->join("espacio", "espacio_vehiculo.espacio_id", "=", "espacio.id")
             ->select(DB::raw("tipo_vehiculo.descripcion ,count(*) as total"))
+            ->where("espacio.estado", "disponible")
             ->groupBy("tipo_vehiculo.descripcion")
             ->get();
 

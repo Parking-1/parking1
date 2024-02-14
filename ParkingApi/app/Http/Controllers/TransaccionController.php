@@ -83,8 +83,12 @@ class TransaccionController extends Controller
                 // busca el vehiculo que se creo o que esta directamente relacionado con esta transaccion
                 $vehiculo = Vehiculo::findOrFail($tid);
                 // asigna un espacio para dicho vehiculo
-                $idEspacio = Espacio::where("estado", "disponible")->first()->id;
-                $vehiculo->espacio()->sync([$idEspacio]);
+                $idEspacio = Espacio::where("estado", "disponible")->first();
+                if(!isset($request["fecha_salida"])){
+                    $idEspacio->estado = "ocupado";
+                    $idEspacio->save();
+                }
+                $vehiculo->espacio()->sync([$idEspacio->id]);
             });
 
             return response()->json(["data" => $request->all(), "status" => 201]);
@@ -165,10 +169,14 @@ class TransaccionController extends Controller
                     "fecha_entrada" => $datos["fecha_entrada"],
                     "fecha_salida" => $now,
                 ],
-                $datos["tipo_tarifa"]
+                $datos->tarifa()->get()[0]["tipo_tarifa"]
         );
                 $request["fecha_salida"] = $now;
                 $request["precio_total"] = ((float)$diff) * $datos->tarifa()->get()[0]["precio_base"];
+                $espacioId = $datos->vehiculo()->first()->espacio()->first()->id;
+                $espacio = Espacio::findOrFail($espacioId);
+                $espacio->estado = "disponible";
+                $espacio->save();
                 $datos->update($request->all());
             });
             return response()->json(["status" => 200]);
