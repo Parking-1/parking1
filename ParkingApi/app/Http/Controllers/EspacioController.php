@@ -7,6 +7,10 @@ use App\Models\Espacio;
 use Illuminate\Http\JsonResponse;
 use Exception;
 use Illuminate\Support\Facades\DB;
+
+use Illuminate\Support\Collection;
+
+
 class EspacioController extends Controller
 {
     public function Save(Request $request) : JsonResponse{
@@ -87,6 +91,16 @@ class EspacioController extends Controller
             return response()->json([
                 "error" => $err->getMessage(),
                 "status" => 400  ]);
+        }
+    }
+    public function GetEspacesBy($estado) : JsonResponse{
+        try{
+            $datos = DB::transaction(function () use ($estado) : Collection {
+                return Espacio::where("estado", $estado)->get();
+            });
+            return response()->json(["datos" => $datos, "status" => 200]);
+        }catch(Exception $err){
+            return response()->json(["error" => $err->getMessage(), "status" => 400]);
         }
     }
 }

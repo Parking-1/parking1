@@ -11,6 +11,7 @@ Route::middleware(['api'])->prefix("espacio")->group(function ()
 
     Route::get("/", [EspacioController::class, "GetPaginate"]);
     Route::get("/{id}", [EspacioController::class, "GetById"]);
+    Route::get("/estado/{estado}", [EspacioController::class, "GetEspacesBy"]);
 
 
     Route::delete("/{id}", [EspacioController::class, "Delete"]);
