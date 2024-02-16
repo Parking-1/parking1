@@ -41,8 +41,6 @@ class RouteServiceProvider extends ServiceProvider
                     base_path('routes/Client/TipoVehiculoRoute.php'),
                     base_path('routes/Client/TransaccionRoute.php'),
                     base_path('routes/Client/UserRoute.php'),
-
-
                 ]);
 
             Route::middleware('web')
@@ -58,7 +56,7 @@ class RouteServiceProvider extends ServiceProvider
     protected function configureRateLimiting()
     {
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            return Limit::perMinute(10)->by($request->user()?->id ?: $request->ip());
         });
     }
 }

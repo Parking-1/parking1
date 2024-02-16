@@ -7,11 +7,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\Rol;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
+    const EMPLEADO_ROL = 'empleado';
+    const ADMINISTRADOR_ROL = 'administrador';
+
 
     /**
      * The attributes that are mass assignable.
@@ -44,6 +49,20 @@ class User extends Authenticatable implements JWTSubject
         'email_verified_at' => 'datetime',
     ];
 
+    public function rol() : BelongsToMany{
+        return $this->belongsToMany(Rol::class, "user_rol", "id_user", "id_rol");
+    }
+    public function isGranted($rol)
+    {
+        dd($this->rol);
+        foreach ($this->rol as $key) {
+
+           if($key['nombre'] == $rol){
+            return true;
+           }
+        }
+        return false;
+    }
     // jwt
 
     public function getJWTIdentifier()

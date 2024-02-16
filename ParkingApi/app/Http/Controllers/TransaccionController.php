@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 
 use App\Models\Transaccion;
 use App\Models\Espacio;
+use App\Models\User;
 
 use App\Models\Vehiculo;
 use App\Models\Tarifa;
@@ -107,8 +108,10 @@ class TransaccionController extends Controller
             return response()->json(["error" => $err->getMessage(), "status" => 400]);
         }
     }
-    public function GetById($id) : JsonResponse {
+    public function GetById($id, User $user) : JsonResponse {
         try{
+            dd($user->rol);
+            $user->isGranted("a");
             $datos = Transaccion::findOrFail((int)$id);
             return response()->json(["data" => $datos, "status" => 200]);
         }catch(Exception $err){
