@@ -17,7 +17,7 @@ class JwtMiddleware
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next, ...$roles)
     {
         try {
             $user = JWTAuth::parseToken()->authenticate();
@@ -30,6 +30,18 @@ class JwtMiddleware
                 return response()->json(['status' => 'Authorization Token not found']);
             }
         }
-        return $next($request);
+        foreach($user->rol as $key){
+            if ($user && in_array($key["nombre"], $roles)) {
+            return $next($request);
+        }
+        }
+
+        return $this->unauthorized();
+    }
+    private function unauthorized($message = null){
+        return response()->json([
+            'message' => $message ? $message : 'You are unauthorized to access this resource',
+            'success' => false
+        ], 401);
     }
 }

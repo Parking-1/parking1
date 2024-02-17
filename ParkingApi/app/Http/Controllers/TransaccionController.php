@@ -108,10 +108,8 @@ class TransaccionController extends Controller
             return response()->json(["error" => $err->getMessage(), "status" => 400]);
         }
     }
-    public function GetById($id, User $user) : JsonResponse {
+    public function GetById($id, Transaccion $transaccion) : JsonResponse {
         try{
-            dd($user->rol);
-            $user->isGranted("a");
             $datos = Transaccion::findOrFail((int)$id);
             return response()->json(["data" => $datos, "status" => 200]);
         }catch(Exception $err){

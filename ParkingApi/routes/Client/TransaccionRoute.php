@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TransaccionController;
 
-Route::middleware(['api', 'jwt.verify'])->prefix("transaccion")->group(function () {
+Route::middleware(['api', 'jwt.verify:administrador,empleado'])->prefix("transaccion")->group(function () {
 
     Route::post("/", [TransaccionController::class, "save"]);
     Route::post("/addrange", [TransaccionController::class, "AddRange"]);

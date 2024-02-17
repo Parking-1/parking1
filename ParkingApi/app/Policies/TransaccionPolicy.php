@@ -30,7 +30,7 @@ class TransaccionPolicy
      */
     public function view(User $user, Transaccion $transaccion)
     {
-        return $user->isGranted(User::EMPLEADO_ROL);
+        return true;
     }
 
     /**
