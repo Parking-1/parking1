@@ -30,13 +30,8 @@ class JwtMiddleware
                 return response()->json(['status' => 'Authorization Token not found']);
             }
         }
-        foreach($user->rol as $key){
-            if ($user && in_array($key["nombre"], $roles)) {
             return $next($request);
-        }
-        }
 
-        return $this->unauthorized();
     }
     private function unauthorized($message = null){
         return response()->json([

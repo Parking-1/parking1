@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 use App\Models\Transaccion;
 use App\Models\Espacio;
 use App\Models\User;
-
 use App\Models\Vehiculo;
 use App\Models\Tarifa;
+
 
 use Illuminate\Http\JsonResponse;
 use Exception;
@@ -108,9 +108,10 @@ class TransaccionController extends Controller
             return response()->json(["error" => $err->getMessage(), "status" => 400]);
         }
     }
-    public function GetById($id, Transaccion $transaccion) : JsonResponse {
+    public function GetById($id) : JsonResponse {
         try{
             $datos = Transaccion::findOrFail((int)$id);
+            $this->authorize(ability:'view', arguments: $datos);
             return response()->json(["data" => $datos, "status" => 200]);
         }catch(Exception $err){
             return response()->json(["error" => $err->getMessage(), "status" => 400]);

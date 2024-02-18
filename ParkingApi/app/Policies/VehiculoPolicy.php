@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
-use App\Models\Transaccion;
+use App\Models\Vehiculo;
 use App\Models\User;
 
-class TransaccionPolicy
+class VehiculoPolicy
 {
     use HandlesAuthorization;
 
@@ -18,20 +18,19 @@ class TransaccionPolicy
      */
     public function viewAny(User $user)
     {
-
+        //
     }
 
     /**
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Transaccion  $transaccion
+     * @param  \App\Models\Vehiculo  $vehiculo
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, Transaccion $transaccion)
+    public function view(User $user, Vehiculo $vehiculo)
     {
-        $roles = $user->rol->pluck("nombre")->toArray();
-        return in_array( USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL  , $roles);
+        //
     }
 
     /**
@@ -49,10 +48,10 @@ class TransaccionPolicy
      * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Transaccion  $transaccion
+     * @param  \App\Models\Vehiculo  $vehiculo
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update(User $user, Transaccion $transaccion)
+    public function update(User $user, Vehiculo $vehiculo)
     {
         //
     }
@@ -61,10 +60,10 @@ class TransaccionPolicy
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Transaccion  $transaccion
+     * @param  \App\Models\Vehiculo  $vehiculo
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, Transaccion $transaccion)
+    public function delete(User $user, Vehiculo $vehiculo)
     {
         //
     }
@@ -73,10 +72,10 @@ class TransaccionPolicy
      * Determine whether the user can restore the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Transaccion  $transaccion
+     * @param  \App\Models\Vehiculo  $vehiculo
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore(User $user, Transaccion $transaccion)
+    public function restore(User $user, Vehiculo $vehiculo)
     {
         //
     }
@@ -85,10 +84,10 @@ class TransaccionPolicy
      * Determine whether the user can permanently delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Transaccion  $transaccion
+     * @param  \App\Models\Vehiculo  $vehiculo
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function forceDelete(User $user, Transaccion $transaccion)
+    public function forceDelete(User $user, Vehiculo $vehiculo)
     {
         //
     }

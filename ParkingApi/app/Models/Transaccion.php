@@ -14,8 +14,10 @@ class Transaccion extends Model
     use HasFactory;
     public static function boot(){
         parent::boot();
-        
+
     }
+ 
+
     protected $table = "transaccion";
     protected $fillable = ["nit", "id_vehiculo", "fecha_entrada", "fecha_salida", "precio_total", "id_tarifa"];
     protected $hidden = ["created_at", "updated_at"];
