@@ -18,7 +18,7 @@ class VehiculoPolicy
      */
     public function viewAny(User $user)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -28,9 +28,9 @@ class VehiculoPolicy
      * @param  \App\Models\Vehiculo  $vehiculo
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, Vehiculo $vehiculo)
+    public function view(User $user, Vehiculo $vehiculo = null)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -41,7 +41,7 @@ class VehiculoPolicy
      */
     public function create(User $user)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -53,7 +53,7 @@ class VehiculoPolicy
      */
     public function update(User $user, Vehiculo $vehiculo)
     {
-        //
+        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -65,7 +65,7 @@ class VehiculoPolicy
      */
     public function delete(User $user, Vehiculo $vehiculo)
     {
-        //
+        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -77,7 +77,7 @@ class VehiculoPolicy
      */
     public function restore(User $user, Vehiculo $vehiculo)
     {
-        //
+        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -89,6 +89,6 @@ class VehiculoPolicy
      */
     public function forceDelete(User $user, Vehiculo $vehiculo)
     {
-        //
+        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
     }
 }

@@ -141,7 +141,10 @@ class TransaccionController extends Controller
     public function Delete($id) : JsonResponse
     {
         try{
-            Transaccion::findOrFail($id)->delete();
+            $trans = Transaccion::findOrFail($id);
+            $this->authorize(ability:'delete', arguments:$trans);
+            $trans
+            ->delete();
             return response()->json([ "status" => 204]);
         }catch(Exception $err){
             return response()->json(["error" => $err->getMessage(), "status" => 400]);
@@ -160,9 +163,11 @@ class TransaccionController extends Controller
     }
     public function Update(Request $request, $id) : JsonResponse
     {
+
         try{
-            DB::transaction(function () use($request,$id){
-                $datos = Transaccion::findOrFail($id);
+            $datos = Transaccion::findOrFail($id);
+            $this->authorize(ability:'Update', arguments:$datos);
+            DB::transaction(function () use($request,$datos){
                 if(isset($datos["fecha_salida"])){
                     throw new Exception("Ya existe la fecha de salida");
                 }

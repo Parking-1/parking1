@@ -3,10 +3,10 @@
 namespace App\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
-use App\Models\Transaccion;
+use App\Models\Cliente;
 use App\Models\User;
 
-class TransaccionPolicy
+class ClientePolicy
 {
     use HandlesAuthorization;
 
@@ -18,19 +18,19 @@ class TransaccionPolicy
      */
     public function viewAny(User $user)
     {
-
+        //
     }
 
     /**
      * Determine whether the user can view the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Transaccion  $transaccion
+     * @param  \App\Models\Cliente  $cliente
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function view(User $user, Transaccion $transaccion)
+    public function view(User $user, Cliente $cliente)
     {
-        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
+        //
     }
 
     /**
@@ -41,55 +41,54 @@ class TransaccionPolicy
      */
     public function create(User $user)
     {
-        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
+        //
     }
 
     /**
      * Determine whether the user can update the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Transaccion  $transaccion
+     * @param  \App\Models\Cliente  $cliente
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function update(User $user, Transaccion $transaccion)
+    public function update(User $user, Cliente $cliente)
     {
-        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
+        //
     }
 
     /**
      * Determine whether the user can delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Transaccion  $transaccion
+     * @param  \App\Models\Cliente  $cliente
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function delete(User $user, Transaccion $transaccion = NULL)
+    public function delete(User $user, Cliente $cliente)
     {
-        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
-
+        //
     }
 
     /**
      * Determine whether the user can restore the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Transaccion  $transaccion
+     * @param  \App\Models\Cliente  $cliente
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function restore(User $user, Transaccion $transaccion)
+    public function restore(User $user, Cliente $cliente)
     {
-        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
+        //
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      *
      * @param  \App\Models\User  $user
-     * @param  \App\Models\Transaccion  $transaccion
+     * @param  \App\Models\Cliente  $cliente
      * @return \Illuminate\Auth\Access\Response|bool
      */
-    public function forceDelete(User $user, Transaccion $transaccion)
+    public function forceDelete(User $user, Cliente $cliente)
     {
-        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
+        //
     }
 }

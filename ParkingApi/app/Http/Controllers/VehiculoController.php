@@ -21,9 +21,11 @@ class VehiculoController extends Controller
     public function GetPaginate() : JsonResponse
     {
         try{
+
             $datos = DB::transaction(function () {
                 return Vehiculo::paginate(15);
             });
+            $this->authorize(ability:'view', arguments:$datos[0]);
             return response()->json(["data" => $datos, "status" => 200]);
         }catch(Exception $err){
             return response()->json(["error" => $err->getMessage(), "status" => 400]);
@@ -32,6 +34,7 @@ class VehiculoController extends Controller
     public function GetById($id) : JsonResponse {
         try{
             $datos = Vehiculo::findOrFail((int)$id);
+            $this->authorize(ability:'view', arguments:$datos);
             return response()->json(["data" => $datos, "status" => 200]);
         }catch(Exception $err){
             return response()->json(["error" => $err->getMessage(), "status" => 400]);
@@ -61,7 +64,10 @@ class VehiculoController extends Controller
     public function Delete($id) : JsonResponse
     {
         try{
-            Vehiculo::findOrFail($id)->delete();
+            $vehiculo = Vehiculo::findOrFail($id);
+            $this->authorize(ability:'delete', arguments: $vehiculo);
+            $vehiculo
+            ->delete();
             return response()->json([ "status" => 204]);
         }catch(Exception $err){
             return response()->json(["error" => $err->getMessage(), "status" => 400]);
@@ -83,6 +89,7 @@ class VehiculoController extends Controller
         try{
             DB::transaction(function () use($request,$id){
                 $datos = Vehiculo::findOrFail($id);
+                $this->authorize(ability:'update', arguments: $datos);
                 $datos->update($request->all());
             });
             return response()->json(["status" => 200]);
