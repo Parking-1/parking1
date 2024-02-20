@@ -3,23 +3,31 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
-use App\Models\Transaccion;
-use App\Models\Espacio;
+// modelos
 use App\Models\User;
 use App\Models\Vehiculo;
 use App\Models\Tarifa;
+use App\Models\Transaccion;
+use App\Models\Espacio;
 
-
+//responses
+use Illuminate\Support\Collection;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Pagination\LengthAwarePaginator;
+
+//excepciones
 use Exception;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use Illuminate\Database\QueryException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Auth\Access\AuthorizationException;
 
 
 class TransaccionController extends Controller
 {
-    private function GetDateDiff(array $fechas, string $tipo){
+    private function GetDateDiff(array $fechas, string $tipo) : int{
         $fecha_entrada = Carbon::parse($fechas["fecha_entrada"]);
         $fecha_salida = Carbon::parse($fechas["fecha_salida"]);
         if($tipo == "hora"){
@@ -100,21 +108,28 @@ class TransaccionController extends Controller
     public function GetPaginate() : JsonResponse
     {
         try{
-            $datos = DB::transaction(function () {
+            $datos = DB::transaction(function ()  : LengthAwarePaginator {
                 return Transaccion::paginate(15);
             });
-            return response()->json(["data" => $datos, "status" => 200]);
-        }catch(Exception $err){
-            return response()->json(["error" => $err->getMessage(), "status" => 400]);
+            return response()->json(["data" => $datos] , status : 200);
+        }catch (QueryException $e) {
+            return response()->json(["error" => "Error de consulta"], status: 500);
+        } catch (Exception $e) {
+            return response()->json(["error" => $e->getMessage()], status:  500);
         }
     }
     public function GetById($id) : JsonResponse {
         try{
             $datos = Transaccion::findOrFail((int)$id);
             $this->authorize(ability:'view', arguments: $datos);
-            return response()->json(["data" => $datos, "status" => 200]);
-        }catch(Exception $err){
-            return response()->json(["error" => $err->getMessage(), "status" => 400]);
+            return response()->json(["data" => $datos], status : 200);
+        }catch (ModelNotFoundException $e) {
+            return response()->json(["error" => "Transaccion no encontrada"], status :  404 );
+        }catch(AuthorizationException $e){
+            return response()->json(["error" => "No autorizado para ver los datos"], status :  403 );
+        }
+        catch (Exception $e) {
+            return response()->json(["error" => $e->getMessage()], status :  500);
         }
     }
     public function AddRange(Request $req) : JsonResponse
@@ -133,9 +148,11 @@ class TransaccionController extends Controller
                         );
                     }
             });
-            return response()->json(["data" => true, "status" => 201]);
-        }catch(Exception $err){
-            return response()->json(["error" => $err->getMessage(), "status" => 400]);
+            return response()->json(["data" => true], status : 201 );
+        }catch (QueryException $e) {
+            return response()->json(["error" => "Error de consulta"], status : 500);
+        } catch (Exception $e) {
+            return response()->json(["error" => $e->getMessage()], status: 500);
         }
     }
     public function Delete($id) : JsonResponse
@@ -145,20 +162,31 @@ class TransaccionController extends Controller
             $this->authorize(ability:'delete', arguments:$trans);
             $trans
             ->delete();
-            return response()->json([ "status" => 204]);
-        }catch(Exception $err){
-            return response()->json(["error" => $err->getMessage(), "status" => 400]);
+            return response()->json(status : 204);
+        }catch (ModelNotFoundException $e) {
+            return response()->json(["error" => "Transaccion no encontrada"], status :  404 );
+        }
+        catch (QueryException $e) {
+            return response()->json(["error" => "Error de consulta"], status : 500);
+        }
+        catch(AuthorizationException $e){
+            return response()->json(["error" => "No autorizado para borrar los datos"], status :  403 );
+        }
+        catch(Exception $err){
+            return response()->json(["error" => $err->getMessage()], status : 500);
         }
     }
     public function DeleteRange(Request $request) : JsonResponse
     {
         try{
             Transaccion::whereIn("id", $request->input("ids"))->delete();
-            return response()->json(["status" => 204]);
-        }catch(Exception $err){
-            return response()->json([
-                "error" => $err->getMessage(),
-                "status" => 400  ]);
+            return response()->json(status : 204);
+        }catch (ModelNotFoundException $e) {
+            return response()->json(["error" => "Transaccion no encontrada"], status: 404);
+        }catch (QueryException $e) {
+            return response()->json(["error" => "Error al eliminar la transaccion"], status: 500);
+        }catch (Exception $e) {
+            return response()->json(["error" => "Error desconocido"], status:  500);
         }
     }
     public function Update(Request $request, $id) : JsonResponse
@@ -167,7 +195,7 @@ class TransaccionController extends Controller
         try{
             $datos = Transaccion::findOrFail($id);
             $this->authorize(ability:'Update', arguments:$datos);
-            DB::transaction(function () use($request,$datos){
+            DB::transaction(function () use($request,$datos) : void{
                 if(isset($datos["fecha_salida"])){
                     throw new Exception("Ya existe la fecha de salida");
                 }
@@ -186,26 +214,34 @@ class TransaccionController extends Controller
                 $espacio->save();
                 $datos->update($request->all());
             });
-            return response()->json(["status" => 200]);
-        }catch(Exception $err){
-            return response()->json([
-                "error" => $err->getMessage(),
-                "status" => 400  ]);
+            return response()->json(status : 201);
+        }catch (ModelNotFoundException $e) {
+            return response()->json(["error" => "tipo de vehiculo no encontrado"], status: 404);
+        }catch(AuthorizationException $e){
+            return response()->json(["error" => "No autorizado para editar los datos"], status :  403 );
+        }catch (QueryException $e) {
+            return response()->json(["error" => "Error al editar la transaccion"], status: 500);
+        }
+        catch (Exception $e) {
+            return response()->json(["error" => $e->getMessage()],  status : 500);
         }
     }
     public function GetBetween(Request $request) : JsonResponse{
         try{
-            $datos = DB::transaction(function () use ($request) {
+            $datos = DB::transaction(function () use ($request) : Collection{
                 $trans = new Transaccion();
                 return $trans
                 ->whereBetween("fecha_entrada", [$request["fecha_entrada"], $request["fecha_salida"]])
                 ->with("vehiculo")
                 ->get();
             });
-            return response()->json(["datos" => $datos, "status" => 200]);
+            return response()->json(["datos" => $datos], status : 200);
 
-        }catch(Exception $err){
-            return response()->json(["error" => $err->getMessage(), "status" => 400]);
+        }catch (QueryException $e) {
+            return response()->json(["error" => "Error al consultar"], status: 500);
+        }
+        catch(Exception $err){
+            return response()->json(["error" => $err->getMessage()], status : 500);
         }
     }
 }
