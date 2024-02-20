@@ -11,8 +11,11 @@ import { toast } from "react-toastify";
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [name, setName] = useState("");
+  const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
@@ -21,7 +24,7 @@ const Register = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if ([email, password].includes("")) {
+    if ([name, lastname, email, password, confirmPassword].includes("")) {
       toast.error("Todos los campos son obligatorios", {
         theme: "dark",
       });
@@ -33,12 +36,25 @@ const Register = () => {
       });
       return;
     }
-    console.log("Toda la funcionalidad de login");
+
+    if (password !== confirmPassword) {
+      toast.error("Los passwords no son iguales", {
+        theme: "dark",
+      });
+      return;
+    }
+    //Validar que el email no exista en la base de datos
+
+    // Enviar email de verificacion
+
+    console.log("Toda la funcionalidad de registro");
   };
   return (
-    <div className="bg-white p-8 rounded-lg m-full md:w-96">
+    <div className="bg-white p-8 rounded-lg w-full md:w-[500px]">
       <div className="mb-10">
-        <h1 className="text-3xl uppercase font-bold">Registrarse</h1>
+        <h1 className="text-3xl uppercase font-bold text-center">
+          Registrarse
+        </h1>
       </div>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         <div className="relative">
@@ -47,8 +63,8 @@ const Register = () => {
             type="text"
             className="w-full border-gray-200 outline-none py-2 px-8 rounded-lg"
             placeholder="Nombre(s)"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={name}
+            onChange={(e) => setName(e.target.value)}
           />
         </div>
         <div className="relative">
@@ -57,8 +73,8 @@ const Register = () => {
             type="text"
             className="w-full border-gray-200 outline-none py-2 px-8 rounded-lg"
             placeholder="Apellidos"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={lastname}
+            onChange={(e) => setLastname(e.target.value)}
           />
         </div>
         <div className="relative">
@@ -108,8 +124,8 @@ const Register = () => {
             type={showPassword ? "text" : "password"}
             className="w-full border-gray-200 outline-none py-2 px-8 rounded-lg"
             placeholder="confirmar-contraseña"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
           />
           {showPassword ? (
             <RiEyeOffLine
@@ -125,7 +141,7 @@ const Register = () => {
         </div>
         <div>
           <button className="mt-6 bg-sky-600 text-white w-full py-2 px-6 rounded-lg hover:scale-105 transition-all">
-            Ingresar
+            Crear cuenta
           </button>
         </div>
       </form>
@@ -133,7 +149,7 @@ const Register = () => {
         <div>
           ¿Ya tienes una cuenta?{" "}
           <Link
-            to="/register"
+            to="/"
             className="text-sky-600 font-medium hover:underline transition-all"
           >
             Ingresa

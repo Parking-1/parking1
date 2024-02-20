@@ -35,9 +35,11 @@ const Login = () => {
     console.log("Toda la funcionalidad de login");
   };
   return (
-    <div className="bg-white p-8 rounded-lg m-full md:w-96">
+    <div className="bg-white p-8 rounded-lg w-full md:w-96">
       <div className="mb-10">
-        <h1 className="text-3xl uppercase font-bold">Iniciar Sesion</h1>
+        <h1 className="text-3xl uppercase font-bold text-center">
+          Iniciar Sesion
+        </h1>
       </div>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-6">
         <div className="relative">
@@ -73,7 +75,7 @@ const Login = () => {
         </div>
         <div className="text-right">
           <Link
-            to="olvide-pasword"
+            to="forgetpassword"
             className="text-gray-500 hover:text-sky-600 hover:underline transition-colors"
           >
             ¿Olvidaste tu password?
