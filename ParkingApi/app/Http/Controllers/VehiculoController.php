@@ -5,10 +5,12 @@ use Illuminate\Support\Facades\DB;
 
 use Illuminate\Http\Request;
 use App\Models\Vehiculo;
+use App\Interface\IPdf;
 
 //responses
 use Illuminate\Support\Collection;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
 use Illuminate\Pagination\LengthAwarePaginator;
 
 //excepciones
@@ -171,5 +173,9 @@ class VehiculoController extends Controller
         catch(Exception $err){
             return response()->json(["error" => $err->getMessage()], status : 500);
         }
+    }
+    public function GetReport(IPdf $pdf) {
+        $data = Vehiculo::with("TipoVehiculo")->get();
+        $pdf->body($data->toArray(), "vehiculo") ;
     }
 }

@@ -9,12 +9,15 @@ use App\Models\Rol;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
+use App\Interface\IPdf;
 
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+
+
 class UserController extends Controller
 {
-    
+
     public function authenticate(Request $request)
     {
         $credentials = $request->only('email', 'password');
@@ -73,7 +76,6 @@ class UserController extends Controller
     }
     public function register(Request $request)
         {
-
                 $validator = Validator::make($request->all(), [
                 'name' => 'required|string|max:255',
                 'email' => 'required|string|email|max:255|unique:users',
