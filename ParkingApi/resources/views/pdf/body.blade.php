@@ -18,16 +18,19 @@
             body {
                 font-family: 'Nunito', sans-serif;
             }
+            table tr{
+                border: 2px solid black;
+            }
         </style>
 </head>
 <body>
-    <table style="width:100%;text-align:center">
+    @include('pdf.header')
+    <table style="width:100%;text-align:center;">
         @if($tipo == "vehiculo")
-        <tr>
+        <tr style="border:2px solid black">
             <th>id</th>
             <th>placa</th>
-            <th>id</th>
-            <th>id</th>
+            <th>tipo de vehiculo</th>
         </tr>
         @endif
         @foreach ($data as $item => $value)
