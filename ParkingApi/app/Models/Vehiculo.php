@@ -22,7 +22,7 @@ class Vehiculo extends Model
     use HasFactory;
     protected $table = "vehiculo";
     protected $fillable = ["placa", "id_cliente", "id_tipo_vehiculo"];
-    protected $hidden = ["created_at", "updated_at"];
+    protected $hidden = ["created_at", "updated_at", "id_tipo_vehiculo", "id_cliente"];
 
     public function cliente() : BelongsTo
     {
