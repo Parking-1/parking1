@@ -25,10 +25,10 @@ const ChangePassword = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if ([password, confirmPassword].includes("")) {
+    if (password.trim() === "" || confirmPassword.trim() === "") {
       toast.error("Todos los campos son obligatorios", {
         theme: "dark",
       });
@@ -47,11 +47,31 @@ const ChangePassword = () => {
       });
       return;
     }
-    toast.success("Tu password se cambio correctamente", {
-      theme: "dark",
-    });
-    return;
-  };
+
+    try {
+        const response = await fetch('URL_DEL_ENDPOINT_PARA_CAMBIAR_LA_CONTRASEÑA', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ password }),
+        });
+        
+        if (!response.ok) {
+            throw new Error('No se pudo cambiar la contraseña');
+        }
+
+        toast.success("Tu contraseña se cambió correctamente", {
+            theme: "dark",
+        });
+    } catch (error) {
+        console.error('Error al cambiar la contraseña:', error);
+        toast.error("Ocurrió un error al cambiar la contraseña", {
+            theme: "dark",
+        });
+    }
+};
+
   return (
     <div className="bg-white p-8 rounded-lg w-full md:w-96">
       <div className="mb-10">

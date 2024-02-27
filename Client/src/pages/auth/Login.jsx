@@ -1,14 +1,16 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   RiMailLine,
   RiLockLine,
   RiEyeLine,
   RiEyeOffLine,
 } from "react-icons/ri";
+import Axios from "axios";
 import { toast } from "react-toastify";
 
 const Login = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -17,28 +19,28 @@ const Login = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-
-    if ([email, password].includes("")) {
-      toast.error("Todos los campos son obligatorios", {
+    try {
+      const response = await Axios.post("/api/login", { email, password });
+      const token = response.data.token;
+      localStorage.setItem("token", token);
+      // Redirige al usuario a la página principal u otra página después del inicio de sesión
+      navigate("/home");
+    } catch (error) {
+      // Muestra un mensaje de error al usuario si la autenticación falla
+      toast.error("Credenciales incorrectas. Por favor, inténtalo de nuevo.", {
         theme: "dark",
       });
-      return;
+      console.error("Error al iniciar sesión:", error);
     }
-    if (password.length < 6) {
-      toast.error("El password debe contener al menos 6 caracteres", {
-        theme: "dark",
-      });
-      return;
-    }
-    console.log("Toda la funcionalidad de login");
   };
+
   return (
     <div className="bg-white p-8 rounded-lg w-full md:w-96">
       <div className="mb-10">
         <h1 className="text-3xl uppercase font-bold text-center">
-          Iniciar Sesion
+          Iniciar Sesión
         </h1>
       </div>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-6">
@@ -47,7 +49,7 @@ const Login = () => {
           <input
             type="email"
             className="w-full border-gray-200 outline-none py-2 px-8 rounded-lg"
-            placeholder="correo-electronico"
+            placeholder="Correo Electrónico"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -57,7 +59,7 @@ const Login = () => {
           <input
             type={showPassword ? "text" : "password"}
             className="w-full border-gray-200 outline-none py-2 px-8 rounded-lg"
-            placeholder="contraseña"
+            placeholder="Contraseña"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -75,10 +77,10 @@ const Login = () => {
         </div>
         <div className="text-right">
           <Link
-            to="forgetpassword"
+            to="/forgetpassword"
             className="text-gray-500 hover:text-sky-600 hover:underline transition-colors"
           >
-            ¿Olvidaste tu password?
+            ¿Olvidaste tu contraseña?
           </Link>
         </div>
         <div>
@@ -90,10 +92,10 @@ const Login = () => {
       <div className="text-center">
         ¿No tienes una cuenta?{" "}
         <Link
-          to="register"
+          to="/register"
           className="text-sky-600 font-medium hover:underline transition-all"
         >
-          Registrate
+          Regístrate
         </Link>
       </div>
     </div>
