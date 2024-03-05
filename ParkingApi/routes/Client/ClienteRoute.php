@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClienteController;
 
-Route::middleware(['api'])->prefix("cliente")->group(function ()
+Route::prefix("cliente")->group(function ()
 {
     Route::post("/", [ClienteController::class, "save"]);
     Route::post("/addrange", [ClienteController::class, "AddRange"]);

@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VehiculoController;
 
-Route::middleware(['api', 'jwt.verify'])->prefix("vehiculo")->group(function () {
+Route::prefix("vehiculo")->group(function () {
 
     Route::post("/", [VehiculoController::class, "save"]);
     Route::post("/addrange", [VehiculoController::class, "AddRange"]);
