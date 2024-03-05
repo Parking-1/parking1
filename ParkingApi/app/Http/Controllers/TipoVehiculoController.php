@@ -34,9 +34,7 @@ class TipoVehiculoController extends Controller
     public function GetPaginate() : JsonResponse
     {
         try{
-            $datos = DB::transaction(function () :  LengthAwarePaginator{
-                return TipoVehiculo::paginate(15);
-            });
+            $datos = TipoVehiculo::paginate(15);
             return response()->json(["data" => $datos], status : 200);
         }catch (QueryException $e) {
             return response()->json(["error" => "Error de consulta"], status: 500);

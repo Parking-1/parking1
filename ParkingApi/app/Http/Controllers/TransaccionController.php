@@ -108,9 +108,7 @@ class TransaccionController extends Controller
     public function GetPaginate() : JsonResponse
     {
         try{
-            $datos = DB::transaction(function ()  : LengthAwarePaginator {
-                return Transaccion::paginate(15);
-            });
+            $datos = Transaccion::paginate(15);
             return response()->json(["data" => $datos] , status : 200);
         }catch (QueryException $e) {
             return response()->json(["error" => "Error de consulta"], status: 500);
