@@ -30,7 +30,7 @@ class CargoPolicy
      */
     public function view(User $user, Cargo $cargo)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -41,7 +41,8 @@ class CargoPolicy
      */
     public function create(User $user)
     {
-        //
+        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
+
     }
 
     /**
@@ -53,7 +54,7 @@ class CargoPolicy
      */
     public function update(User $user, Cargo $cargo)
     {
-        //
+        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -65,7 +66,7 @@ class CargoPolicy
      */
     public function delete(User $user, Cargo $cargo)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -77,7 +78,8 @@ class CargoPolicy
      */
     public function restore(User $user, Cargo $cargo)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
+
     }
 
     /**
@@ -89,6 +91,7 @@ class CargoPolicy
      */
     public function forceDelete(User $user, Cargo $cargo)
     {
-        //
+        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
+
     }
 }

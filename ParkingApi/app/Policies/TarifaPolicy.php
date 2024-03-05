@@ -30,7 +30,8 @@ class TarifaPolicy
      */
     public function view(User $user, Tarifa $tarifa)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
+
     }
 
     /**
@@ -41,7 +42,7 @@ class TarifaPolicy
      */
     public function create(User $user)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -53,7 +54,7 @@ class TarifaPolicy
      */
     public function update(User $user, Tarifa $tarifa)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -65,7 +66,7 @@ class TarifaPolicy
      */
     public function delete(User $user, Tarifa $tarifa)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -77,7 +78,8 @@ class TarifaPolicy
      */
     public function restore(User $user, Tarifa $tarifa)
     {
-        //
+        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
+
     }
 
     /**
