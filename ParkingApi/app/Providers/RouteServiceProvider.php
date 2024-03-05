@@ -33,6 +33,12 @@ class RouteServiceProvider extends ServiceProvider
                 ->prefix('api')
                 ->group([
                     base_path('routes/api.php'),
+                    base_path('routes/Client/UserRoute.php'),
+                ]);
+                Route::middleware('api', //'jwt.verify'
+                )
+                ->prefix('api')
+                ->group([
                     base_path('routes/Client/VehiculoRoute.php'),
                     base_path('routes/Client/ClienteRoute.php'),
                     base_path('routes/Client/CargoRoute.php'),
@@ -40,7 +46,6 @@ class RouteServiceProvider extends ServiceProvider
                     base_path('routes/Client/TarifaRoute.php'),
                     base_path('routes/Client/TipoVehiculoRoute.php'),
                     base_path('routes/Client/TransaccionRoute.php'),
-                    base_path('routes/Client/UserRoute.php'),
                 ]);
 
             Route::middleware('web')
