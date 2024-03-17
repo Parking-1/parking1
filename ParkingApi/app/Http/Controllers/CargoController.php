@@ -31,9 +31,7 @@ class CargoController extends Controller
     public function GetPaginate() : JsonResponse
     {
         try{
-            $datos = DB::transaction(function () : LengthAwarePaginator {
-                return Cargo::paginate(15);
-            });
+            $datos = Cargo::paginate(15);
             return response()->json(["data" => $datos], 200);
         }catch (QueryException $e) {
             return response()->json(["error" => "Error de consulta"], 500);

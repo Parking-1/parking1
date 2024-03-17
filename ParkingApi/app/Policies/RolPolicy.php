@@ -18,7 +18,7 @@ class RolPolicy
      */
     public function viewAny(User $user)
     {
-        //
+
     }
 
     /**
@@ -30,7 +30,7 @@ class RolPolicy
      */
     public function view(User $user, Rol $rol)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -41,7 +41,8 @@ class RolPolicy
      */
     public function create(User $user)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
+
     }
 
     /**
@@ -53,7 +54,8 @@ class RolPolicy
      */
     public function update(User $user, Rol $rol)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
+
     }
 
     /**
@@ -65,7 +67,7 @@ class RolPolicy
      */
     public function delete(User $user, Rol $rol)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -77,7 +79,7 @@ class RolPolicy
      */
     public function restore(User $user, Rol $rol)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -89,6 +91,6 @@ class RolPolicy
      */
     public function forceDelete(User $user, Rol $rol)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
     }
 }

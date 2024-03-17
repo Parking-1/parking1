@@ -30,7 +30,8 @@ class TipoVehiculoPolicy
      */
     public function view(User $user, TipoVehiculo $tipoVehiculo)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
+
     }
 
     /**
@@ -41,7 +42,8 @@ class TipoVehiculoPolicy
      */
     public function create(User $user)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
+
     }
 
     /**
@@ -53,7 +55,8 @@ class TipoVehiculoPolicy
      */
     public function update(User $user, TipoVehiculo $tipoVehiculo)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
+
     }
 
     /**
@@ -65,7 +68,8 @@ class TipoVehiculoPolicy
      */
     public function delete(User $user, TipoVehiculo $tipoVehiculo)
     {
-        //
+        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
+
     }
 
     /**
@@ -77,7 +81,8 @@ class TipoVehiculoPolicy
      */
     public function restore(User $user, TipoVehiculo $tipoVehiculo)
     {
-        //
+        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
+
     }
 
     /**
@@ -89,6 +94,7 @@ class TipoVehiculoPolicy
      */
     public function forceDelete(User $user, TipoVehiculo $tipoVehiculo)
     {
-        //
+        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
+        
     }
 }

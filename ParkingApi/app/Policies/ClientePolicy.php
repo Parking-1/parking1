@@ -30,7 +30,7 @@ class ClientePolicy
      */
     public function view(User $user, Cliente $cliente)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -41,7 +41,7 @@ class ClientePolicy
      */
     public function create(User $user)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -53,7 +53,8 @@ class ClientePolicy
      */
     public function update(User $user, Cliente $cliente)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
+
     }
 
     /**
@@ -65,7 +66,8 @@ class ClientePolicy
      */
     public function delete(User $user, Cliente $cliente)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
+
     }
 
     /**
@@ -77,7 +79,7 @@ class ClientePolicy
      */
     public function restore(User $user, Cliente $cliente)
     {
-        //
+        return $user->isGranted(USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -89,6 +91,6 @@ class ClientePolicy
      */
     public function forceDelete(User $user, Cliente $cliente)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
     }
 }

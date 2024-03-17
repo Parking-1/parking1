@@ -31,9 +31,7 @@ class ClienteController extends Controller
     public function GetPaginate() : JsonResponse
     {
         try{
-            $datos = DB::transaction(function () : LengthAwarePaginator {
-                return Cliente::paginate(15);
-            });
+            $datos = Cliente::paginate(15);
             return response()->json(["data" => $datos], 200);
         }catch (QueryException $e) {
             return response()->json(["error" => "Error de consulta"], 500);
@@ -43,7 +41,7 @@ class ClienteController extends Controller
     }
     public function GetById($id) : JsonResponse {
         try{
-            $datos = Cliente::findOrFail((int)$id);
+            $datos = Cliente::select("nombre")->findOrFail((int)$id);
             return response()->json(["data" => $datos, "status" => 200]);
         }catch (ModelNotFoundException $e) {
             return response()->json(["error" => "Cliente no encontrado"],404);

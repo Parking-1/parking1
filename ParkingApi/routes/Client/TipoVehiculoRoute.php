@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TipoVehiculoController;
 
-Route::middleware(['api'])->prefix("tipovehiculo")->group(function () {
+Route::prefix("tipovehiculo")->group(function () {
 
     Route::post("/", [TipoVehiculoController::class, "save"]);
     Route::post("/addrange", [TipoVehiculoController::class, "AddRange"]);

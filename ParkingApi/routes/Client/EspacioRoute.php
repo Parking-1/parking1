@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EspacioController;
 
-Route::middleware(['api'])->prefix("espacio")->group(function ()
+Route::prefix("espacio")->group(function ()
 {
     Route::post("/", [EspacioController::class, "save"]);
     Route::post("/addrange", [EspacioController::class, "AddRange"]);

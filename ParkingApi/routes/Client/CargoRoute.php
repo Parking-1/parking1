@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CargoController;
 
-Route::middleware(['api'])->prefix("cargo")->group(function ()
+Route::prefix("cargo")->group(function ()
 {
     Route::post("/", [CargoController::class, "save"]);
     Route::post("/addrange", [CargoController::class, "AddRange"]);

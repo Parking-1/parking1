@@ -10,6 +10,6 @@ Route::prefix("user")->group(function () {
 
 });
 
-Route::middleware(['api', 'jwt.verify'])->prefix('user')->group(function () {
+Route::prefix('user')->group(function () {
     Route::post('/logout', [UserController::class, "logOut"]);
 });

@@ -30,7 +30,7 @@ class EspacioPolicy
      */
     public function view(User $user, Espacio $espacio)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -41,7 +41,7 @@ class EspacioPolicy
      */
     public function create(User $user)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -53,7 +53,7 @@ class EspacioPolicy
      */
     public function update(User $user, Espacio $espacio)
     {
-        //
+        return $user->isGranted(USER::EMPLEADO_ROL || USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -65,7 +65,7 @@ class EspacioPolicy
      */
     public function delete(User $user, Espacio $espacio)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -77,7 +77,7 @@ class EspacioPolicy
      */
     public function restore(User $user, Espacio $espacio)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
     }
 
     /**
@@ -89,6 +89,6 @@ class EspacioPolicy
      */
     public function forceDelete(User $user, Espacio $espacio)
     {
-        //
+        return $user->isGranted( USER::ADMINISTRADOR_ROL, $user);
     }
 }

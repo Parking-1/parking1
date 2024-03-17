@@ -35,9 +35,7 @@ class VehiculoController extends Controller
     {
         try{
 
-            $datos = DB::transaction(function () {
-                return Vehiculo::paginate(15);
-            });
+            $datos =  Vehiculo::paginate(15);
             $this->authorize(ability:'view', arguments:$datos[0]);
             return response()->json(["data" => $datos, "status" => 200]);
         }catch (QueryException $e) {
