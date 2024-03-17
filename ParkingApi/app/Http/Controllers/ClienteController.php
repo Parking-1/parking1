@@ -31,7 +31,7 @@ class ClienteController extends Controller
     public function GetPaginate() : JsonResponse
     {
         try{
-            $datos = Cliente::paginate(15);
+            $datos = Cliente::select("nombre", "apellido")->paginate(15);
             return response()->json(["data" => $datos], 200);
         }catch (QueryException $e) {
             return response()->json(["error" => "Error de consulta"], 500);

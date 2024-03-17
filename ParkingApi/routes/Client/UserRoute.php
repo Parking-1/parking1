@@ -7,6 +7,7 @@ use App\Http\Controllers\UserController;
 Route::prefix("user")->group(function () {
     Route::post('/register', [UserController::class, "register"]);
     Route::post('/login', [UserController::class, "authenticate"]);
+    Route::post('/verifyEmail',[UserController::class, "GetIfExistsEmail"]);
 
 });
 

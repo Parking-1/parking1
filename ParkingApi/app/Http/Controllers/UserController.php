@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -10,7 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
 use App\Interface\IPdf;
-
+use Exception;
 use JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 
@@ -29,6 +30,17 @@ class UserController extends Controller
             return response()->json(['error' => 'could_not_create_token'], 500);
         }
         return response()->json(compact('token'));
+    }
+    public function GetIfExistsEmail(Request $user){
+        try{
+            $exist = User::where("email", $user->email)->exists();
+            if(!$exist) throw new ModelNotFoundException();
+            return response($exist, 200);
+        }catch(ModelNotFoundException $e){
+            return response(false, 404);
+        }catch(Exception){
+            return response(false, 500);
+        }
     }
     public function getAuthenticatedUser()
     {
