@@ -21,50 +21,50 @@ import {
 const Sidebar = () => {
   return (
     <div className="flex flex-col h-screen w-64 p-4 bg-secondary-500 border border-secondary-100">
-      <div>
-        <span>
+      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
+        <span className="px-2">
           <RiCurrencyLine />
         </span>
         <Tarifas />
       </div>
-      <div>
-        <span>
+      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
+        <span className="px-2">
           <RiParkingBoxLine />
         </span>
         <Ingresos />
       </div>
-      <div>
-        <span>
+      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
+        <span className="px-2">
           <RiDoorOpenLine />
         </span>
         <Salidas />
       </div>
-      <div>
-        <span>
+      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
+        <span className="px-2">
           <RiTeamLine />
         </span>
         <Abonados />
       </div>
-      <div>
-        <span>
+      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
+        <span className="px-2">
           <RiCashLine />
         </span>
         <Caja />
       </div>
-      <div>
-        <span>
+      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
+        <span className="px-2">
           <RiWalletLine />
         </span>
         <Pagos />
       </div>
-      <div>
-        <span>
+      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
+        <span className="px-2">
           <RiBarChart2Line />
         </span>
         <Reportes />
       </div>
-      <div>
-        <span>
+      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
+        <span className="px-2">
           <RiUser3Line />
         </span>
         <Usuarios />

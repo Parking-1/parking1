@@ -4,7 +4,7 @@ import { RiMore2Line } from "react-icons/ri";
 const Navbar = () => {
   return (
     <nav className=" h-[7vh] md:h-[10vh] border-b border-secondary-100 p-8 flex items-center justify-between bg-blue-500">
-      <ul className="inline-flex">
+      <ul className="inline-flex text-xl">
         <li className="p-3">Home</li>
         <li className="p-3">Admin</li>
       </ul>
