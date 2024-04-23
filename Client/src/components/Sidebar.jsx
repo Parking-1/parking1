@@ -20,54 +20,56 @@ import {
 
 const Sidebar = () => {
   return (
-    <div className="flex flex-col h-screen w-64 p-4 bg-secondary-500 border border-secondary-100">
-      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
-        <span className="px-2">
-          <RiCurrencyLine />
-        </span>
-        <Tarifas />
-      </div>
-      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
-        <span className="px-2">
-          <RiParkingBoxLine />
-        </span>
-        <Ingresos />
-      </div>
-      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
-        <span className="px-2">
-          <RiDoorOpenLine />
-        </span>
-        <Salidas />
-      </div>
-      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
-        <span className="px-2">
-          <RiTeamLine />
-        </span>
-        <Abonados />
-      </div>
-      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
-        <span className="px-2">
-          <RiCashLine />
-        </span>
-        <Caja />
-      </div>
-      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
-        <span className="px-2">
-          <RiWalletLine />
-        </span>
-        <Pagos />
-      </div>
-      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
-        <span className="px-2">
-          <RiBarChart2Line />
-        </span>
-        <Reportes />
-      </div>
-      <div className="flex flex-row items-center py-4 px-2 text-white text-xl">
-        <span className="px-2">
-          <RiUser3Line />
-        </span>
-        <Usuarios />
+    <div className="relative top-18 left-0 h-full w-64 p-4 bg-secondary-500 border border-secondary-100">
+      <div className="flex flex-col text-white text-xl">
+        <div className="flex items-center py-4 px-2">
+          <span className="px-2">
+            <RiCurrencyLine />
+          </span>
+          <Tarifas />
+        </div>
+        <div className="flex items-center py-4 px-2">
+          <span className="px-2">
+            <RiParkingBoxLine />
+          </span>
+          <Ingresos />
+        </div>
+        <div className="flex items-center py-4 px-2">
+          <span className="px-2">
+            <RiDoorOpenLine />
+          </span>
+          <Salidas />
+        </div>
+        <div className="flex items-center py-4 px-2">
+          <span className="px-2">
+            <RiTeamLine />
+          </span>
+          <Abonados />
+        </div>
+        <div className="flex items-center py-4 px-2">
+          <span className="px-2">
+            <RiCashLine />
+          </span>
+          <Caja />
+        </div>
+        <div className="flex items-center py-4 px-2">
+          <span className="px-2">
+            <RiWalletLine />
+          </span>
+          <Pagos />
+        </div>
+        <div className="flex items-center py-4 px-2">
+          <span className="px-2">
+            <RiBarChart2Line />
+          </span>
+          <Reportes />
+        </div>
+        <div className="flex items-center py-4 px-2">
+          <span className="px-2">
+            <RiUser3Line />
+          </span>
+          <Usuarios />
+        </div>
       </div>
     </div>
   );
