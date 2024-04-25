@@ -20,7 +20,7 @@ import {
 
 const Sidebar = () => {
   return (
-    <div className="relative top-18 left-0 h-full w-64 p-4 bg-secondary-500 border border-secondary-100">
+    <div className="relative top-18 left-0 h-full w-64 p-4 bg-gray-500 border border-secondary-100">
       <div className="flex flex-col text-white text-xl">
         <div className="flex items-center py-4 px-2">
           <span className="px-2">
