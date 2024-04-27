@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import Tarifas from "./Tarifas";
+import { Link } from "react-router-dom";
 import Ingresos from "./Ingresos";
 import Salidas from "./Salidas";
 import Abonados from "./Abonados";
@@ -26,7 +26,7 @@ const Sidebar = () => {
           <span className="px-2">
             <RiCurrencyLine />
           </span>
-          <Tarifas />
+          <Link to="/tarifas">Tarifas</Link>
         </div>
         <div className="flex items-center py-4 px-2">
           <span className="px-2">
