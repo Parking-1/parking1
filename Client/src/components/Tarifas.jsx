@@ -21,7 +21,7 @@ const Tarifas = () => {
   return (
     <div>
       <form className="flex flex-col" onSubmit={() => alert("submitting")}>
-      <h1 className="mb-4">Tarifas</h1>
+        <h1 className="mb-4">Tarifas</h1>
         <input
           type="text"
           placeholder="Clase de Vehiculo"

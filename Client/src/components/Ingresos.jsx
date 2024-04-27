@@ -25,5 +25,3 @@ const Ingresos = () => {
 };
 
 export default Ingresos;
-
-
