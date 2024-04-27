@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import Ingresos from "./Ingresos";
 import Salidas from "./Salidas";
 import Abonados from "./Abonados";
 import Caja from "./Caja";
@@ -32,7 +31,7 @@ const Sidebar = () => {
           <span className="px-2">
             <RiParkingBoxLine />
           </span>
-          <Ingresos />
+          <Link to="/ingresos">Ingresos</Link>
         </div>
         <div className="flex items-center py-4 px-2">
           <span className="px-2">

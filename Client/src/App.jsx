@@ -6,6 +6,7 @@ import ChangePassword from "./pages/auth/ChangePassword";
 import Home from "./pages/auth/Home";
 import Tarifas from "./components/Tarifas";
 import Error404 from "./pages/404";
+import Ingresos from "./components/Ingresos";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="changepassword/:id" element={<ChangePassword />} />
         <Route path="/home" element={<Home />} />
         <Route path="/tarifas" element={<Tarifas />} />
+        <Route path="/ingresos" element={<Ingresos />} />
         <Route path="*" element={<Error404 />} />
       </Routes>
     </BrowserRouter>

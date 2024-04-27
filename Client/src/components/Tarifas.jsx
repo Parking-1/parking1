@@ -20,8 +20,8 @@ const Tarifas = () => {
 
   return (
     <div>
-      <h1 className="mb-4">Tarifas</h1>
       <form className="flex flex-col" onSubmit={() => alert("submitting")}>
+      <h1 className="mb-4">Tarifas</h1>
         <input
           type="text"
           placeholder="Clase de Vehiculo"
