@@ -5,8 +5,8 @@ const Ingresos = () => {
   return (
     <div>
       <form>
-        <h1>Ingrese placa o matrícula del vehículo</h1>
-        <textarea></textarea>
+        <label>Ingrese placa o matrícula del vehículo</label>
+        <textarea placeholder="Ingrese placa o matrícula del vehículo"></textarea>
         <div>
           <label>Seleccione clase de vehículo</label>
           <select>
@@ -19,6 +19,7 @@ const Ingresos = () => {
           <div>Fecha</div>
         </div>
         <button>Ingresar</button>
+        <button>Click aqui si quiere borrar el ingreso</button>
       </form>
     </div>
   );

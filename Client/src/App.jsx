@@ -7,6 +7,7 @@ import Home from "./pages/auth/Home";
 import Tarifas from "./components/Tarifas";
 import Error404 from "./pages/404";
 import Ingresos from "./components/Ingresos";
+import Salidas from "./components/Salidas";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/tarifas" element={<Tarifas />} />
         <Route path="/ingresos" element={<Ingresos />} />
+        <Route path="/salidas" element={<Salidas />} />
         <Route path="*" element={<Error404 />} />
       </Routes>
     </BrowserRouter>
