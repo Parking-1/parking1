@@ -37,13 +37,13 @@ const Sidebar = () => {
           <span className="px-2">
             <RiDoorOpenLine />
           </span>
-          <Salidas />
+          <Link to="/salidas">Salidas</Link>
         </div>
         <div className="flex items-center py-4 px-2">
           <span className="px-2">
             <RiTeamLine />
           </span>
-          <Abonados />
+          <Link to="/abonados">Abonados</Link>
         </div>
         <div className="flex items-center py-4 px-2">
           <span className="px-2">
