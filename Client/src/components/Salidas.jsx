@@ -18,10 +18,8 @@ const Salidas = () => {
         <div>Fecha de Salida</div>
         <div>Cobro por Parking</div>
         <div>Cobro por Lavado</div>
-        <option>
-          <checkbox>Si Lavado</checkbox>
-          <checkbox>No Lavado</checkbox>
-        </option>
+        <input type="checkbox" />
+        <input type="checkbox" />
         <button>Ir a pagar</button>
       </form>
     </div>
