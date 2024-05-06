@@ -10,23 +10,33 @@ const Ingresos = () => {
       <div>
         <div className="flex">
           <Sidebar />
-          <form>
-            <label>Ingrese placa o matrícula del vehículo</label>
-            <textarea placeholder="Ingrese placa o matrícula del vehículo"></textarea>
-            <div>
-              <label>Seleccione clase de vehículo</label>
-              <select>
-                <option value="auto">Auto</option>
-                <option value="moto">Moto</option>
-                <option value="camion">Camión</option>
-                <option value="bus">Bus</option>
-              </select>
-              <div>Hora</div>
-              <div>Fecha</div>
-            </div>
-            <button>Ingresar</button>
-            <button>Click aqui si quiere borrar el ingreso</button>
-          </form>
+          <div className="flex flex-col justify-center items-center mx-auto my-30">
+            <form>
+              <h1>Ingrese placa o matrícula del vehículo</h1>
+              <input
+                className="w-full h-40 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase"
+                type="text"
+                placeholder="Ingrese placa o matrícula del vehículo"
+              />
+              <div>
+                <h1>Seleccione clase de vehículo</h1>
+                <select className="flex flex-col w-60 h-10 px-4 py-2 rounded-lg border">
+                  <option value="auto">Auto</option>
+                  <option value="moto">Moto</option>
+                  <option value="camion">Camión</option>
+                  <option value="bus">Bus</option>
+                </select>
+                <div className="flex flex-row">Hora</div>
+                <div className="flex flex-row">Fecha</div>
+              </div>
+              <button className="bg-green-500 text-white font-bold py-2 px-4 rounded-md mt-6 mb-2 w-48">
+                Ingresar
+              </button>
+              <button className="flex flex-col text-blue">
+                Click aqui si quiere borrar el ingreso
+              </button>
+            </form>
+          </div>
         </div>
       </div>
     </div>

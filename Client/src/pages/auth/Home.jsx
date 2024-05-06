@@ -18,7 +18,9 @@ const Home = () => {
         <div className="flex m-auto w-100 ">
           <div className="grid grid-cols-4 gap-16">
             <div className="text-2xl m-13 text-white  text-center border ">
-              <div className="bg-blue-500 p-8">Estacionados Hoy</div>
+              <Link to="/ingresos" className="bg-blue-500 p-8">
+                Estacionados Hoy
+              </Link>
 
               <img
                 src={Garage}
@@ -26,21 +28,28 @@ const Home = () => {
               ></img>
             </div>
             <div className="text-2xl m-13  text-center  text-white border ">
-              <div className="bg-blue-500 p-8">Tarifas</div>
+              <Link to="/tarifas" className="bg-blue-500 p-8">
+                Tarifas
+              </Link>
               <img
                 src={barras}
                 className="max-h-40 m-auto min-w-60 max-w-60"
               ></img>
             </div>
             <div className="text-2xl m-13  text-center  text-white border">
-              <div className="bg-blue-500 p-8">Dinero en Caja</div>
+              <Link to="/caja" className="bg-blue-500 p-8">
+                Dinero en Caja
+              </Link>
               <img
                 src={Cashbox}
                 className="max-h-40 m-auto min-w-60 max-w-60"
               ></img>
             </div>
             <div className="text-2xl m-13  text-center text-white border">
-              <div className="bg-blue-500 p-8"> Abonados</div>
+              <Link to="/abonados" className="bg-blue-500 p-8">
+                {" "}
+                Abonados
+              </Link>
               <img
                 src={Team}
                 className="max-h-40 m-auto min-w-60 max-w-60"
