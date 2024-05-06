@@ -5,6 +5,7 @@ import Garage from "../../assets/Garage-removebg-preview.png";
 import Team from "../../assets/team-removebg-preview.png";
 import Cashbox from "../../assets/Cashbox.png";
 import Footer from "../../components/Footer";
+import { Link } from "react-router-dom";
 
 const Home = () => {
   return (

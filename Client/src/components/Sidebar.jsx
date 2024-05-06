@@ -49,25 +49,25 @@ const Sidebar = () => {
           <span className="px-2">
             <RiCashLine />
           </span>
-          <Caja />
+          <Link to="/caja">Caja</Link>
         </div>
         <div className="flex items-center py-4 px-2">
           <span className="px-2">
             <RiWalletLine />
           </span>
-          <Pagos />
+          <Link to="/pagos">Pagos</Link>
         </div>
         <div className="flex items-center py-4 px-2">
           <span className="px-2">
             <RiBarChart2Line />
           </span>
-          <Reportes />
+          <Link to="/reportes">Reportes</Link>
         </div>
         <div className="flex items-center py-4 px-2">
           <span className="px-2">
             <RiUser3Line />
           </span>
-          <Usuarios />
+          <Link to="/usuarios">Usuarios</Link>
         </div>
       </div>
     </div>

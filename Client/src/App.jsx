@@ -8,6 +8,11 @@ import Tarifas from "./components/Tarifas";
 import Error404 from "./pages/404";
 import Ingresos from "./components/Ingresos";
 import Salidas from "./components/Salidas";
+import Abonados from "./components/Abonados";
+import Caja from "./components/Caja";
+import Usuarios from "./components/Usuarios";
+import Reportes from "./components/Reportes";
+import Pagos from "./components/Pagos";
 
 function App() {
   return (
@@ -21,6 +26,11 @@ function App() {
         <Route path="/tarifas" element={<Tarifas />} />
         <Route path="/ingresos" element={<Ingresos />} />
         <Route path="/salidas" element={<Salidas />} />
+        <Route path="/abonados" element={<Abonados />} />
+        <Route path="/caja" element={<Caja />} />
+        <Route path="/pagos" element={<Pagos />} />
+        <Route path="/reportes" element={<Reportes />} />
+        <Route path="/usuarios" element={<Usuarios />} />
         <Route path="*" element={<Error404 />} />
       </Routes>
     </BrowserRouter>
