@@ -19,10 +19,10 @@ const Home = () => {
           <div className="grid grid-cols-4 gap-10 ml-40">
             <div className="text-2xl m-13 text-white text-center border">
               <div className="flex flex-col items-center justify-center h-full">
-              <div className="w-full bg-blue-500 p-8">
-                <Link to="/ingresos" className="bg-blue-500 p-8">
-                  Estacionados Hoy
-                </Link>
+                <div className="w-full bg-blue-500 p-8">
+                  <Link to="/ingresos" className="bg-blue-500 p-8">
+                    Estacionados Hoy
+                  </Link>
                 </div>
                 <img
                   src={Garage}
@@ -48,10 +48,10 @@ const Home = () => {
             </div>
             <div className="text-2xl m-13 text-center text-white border">
               <div className="flex flex-col items-center justify-center h-full">
-              <div className="w-full bg-blue-500 p-8">
-                <Link to="/caja" className="bg-blue-500 p-8">
-                  Dinero en Caja
-                </Link>
+                <div className="w-full bg-blue-500 p-8">
+                  <Link to="/caja" className="bg-blue-500 p-8">
+                    Dinero en Caja
+                  </Link>
                 </div>
                 <img
                   src={Cashbox}
@@ -62,10 +62,10 @@ const Home = () => {
             </div>
             <div className="text-2xl m-13 text-center text-white border">
               <div className="flex flex-col items-center justify-center h-full">
-              <div className="w-full bg-blue-500 p-8">
-                <Link to="/abonados" className="bg-blue-500 p-8">
-                  Abonados
-                </Link>
+                <div className="w-full bg-blue-500 p-8">
+                  <Link to="/abonados" className="bg-blue-500 p-8">
+                    Abonados
+                  </Link>
                 </div>
                 <img
                   src={Team}
