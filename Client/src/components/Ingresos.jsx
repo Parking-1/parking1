@@ -14,7 +14,7 @@ const Ingresos = () => {
             <form>
               <h1>Ingrese placa o matrícula del vehículo</h1>
               <input
-                className="w-full h-40 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase"
+                className="w-full h-40 px-4 py-2 rounded-lg border border-gray-300 text-4xl uppercase mx-100%"
                 type="text"
                 placeholder="Ingrese placa o matrícula del vehículo"
               />
