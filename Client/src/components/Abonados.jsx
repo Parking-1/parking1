@@ -32,20 +32,22 @@ const Abonados = () => {
                   placeholder="Placa de Vehiculo"
                 />
               </div>
-            <div className=" grid grid-rows grid-flow-col w-100 mt-10">
-              <input
-                className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase mb-4 mr-6 "
-                type="text"
-                placeholder="Monto x Sem. o Mes."
-              />
-                <select className=" h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase mb-4 mr-6 ">Duracion del Plan
-                <option>15 dias</option>
-                <option>30 dias</option>
-                <option>60 dias</option>
+              <div className=" grid grid-rows grid-flow-col w-100 mt-10">
+                <input
+                  className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase mb-4 mr-6 "
+                  type="text"
+                  placeholder="Monto x Sem. o Mes."
+                />
+                <select className=" h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase mb-4 mr-6 ">
+                  Duracion del Plan
+                  <option>15 dias</option>
+                  <option>30 dias</option>
+                  <option>60 dias</option>
                 </select>
-                <select className=" h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase mb-4 mr-6 ">Tipo de Plan (Mensual - Semanal)
-                <option>Semanal</option>
-                <option>Mensual</option>
+                <select className=" h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase mb-4 mr-6 ">
+                  Tipo de Plan (Mensual - Semanal)
+                  <option>Semanal</option>
+                  <option>Mensual</option>
                 </select>
                 <button className="bg-green-500 text-white font-bold py-2 px-4 rounded-md mb-4 w-48 h-12">
                   Calcular Plan
@@ -64,24 +66,23 @@ const Abonados = () => {
                 />
               </div>
               <div className=" grid grid-rows grid-flow-col  w-100">
-
-              <table>
-                <thead>
-                  <td>Nro</td>
-                  <td>Dia Pago</td>
-                  <td>Fecha</td>
-                  <td>Pago</td>
-                </thead>
-                <tbody>
-                  <td>1</td>
-                  <td>Viernes</td>
-                  <td>27 de Mayo de 2023</td>
-                  <td>100.00</td>
-                </tbody>
-              </table>
-              <button className="bg-green-500 text-white font-bold py-2 px-4 rounded-md mt-6 mb-2 w-48 h-12">
-                Grabar Plan
-              </button>
+                <table>
+                  <thead>
+                    <td>Nro</td>
+                    <td>Dia Pago</td>
+                    <td>Fecha</td>
+                    <td>Pago</td>
+                  </thead>
+                  <tbody>
+                    <td>1</td>
+                    <td>Viernes</td>
+                    <td>27 de Mayo de 2023</td>
+                    <td>100.00</td>
+                  </tbody>
+                </table>
+                <button className="bg-green-500 text-white font-bold py-2 px-4 rounded-md mt-6 mb-2 w-48 h-12">
+                  Grabar Plan
+                </button>
               </div>
             </form>
           </div>

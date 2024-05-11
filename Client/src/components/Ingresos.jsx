@@ -26,8 +26,8 @@ const Ingresos = () => {
                   <option value="camion">Camión</option>
                   <option value="bus">Bus</option>
                 </select>
-                <div className="flex flex-row">Hora</div>
-                <div className="flex flex-row">Fecha</div>
+                <div className="flex flex-row mt-4">Hora</div>
+                <div className="flex flex-row mt-4">Fecha</div>
               </div>
               <button className="bg-green-500 text-white font-bold py-2 px-4 rounded-md mt-6 mb-2 w-48">
                 Ingresar
