@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import Salidas from "./Salidas";
-import Abonados from "./Abonados";
-import Caja from "./Caja";
-import Pagos from "./Pagos";
-import Reportes from "./Reportes";
-import Usuarios from "./Usuarios";
+
 import {
   RiCurrencyLine,
   RiParkingBoxLine,
