@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
@@ -45,6 +45,10 @@ const Tarifas = () => {
       console.error("Error saving tarifa", error);
     }
   };
+
+  const handleEdit =() =>{}
+
+  const handleDelete =() =>{}
 
   return (
     <div>
