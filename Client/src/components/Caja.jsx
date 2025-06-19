@@ -7,70 +7,99 @@ const Caja = () => {
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <div className=" m-auto w-100 mt-10">
-          <div className=" w-100 ">
-            <h1 className="">Efectivo Neto en Caja: </h1>
-            <h1 className="">Moneda: </h1>
-            <form className="w-100">
-              <h1 className="mt-4 mb-2 border-b pb-2">Ingresos</h1>
-              <div className=" flex flex-row grid-flow-col gap-10 mt-6">
+        <div className="m-auto w-full mt-10 p-6 max-w-screen-md">
+          <h1 className="text-xl font-semibold mb-2">Efectivo Neto en Caja:</h1>
+          <h1 className="text-lg mb-6">Moneda:</h1>
+
+          <form className="space-y-6">
+            {/* Ingresos */}
+            <div>
+              <h2 className="text-lg font-bold border-b pb-2 mb-4">Ingresos</h2>
+              <div className="flex flex-col md:flex-row gap-4">
                 <input
+                  name="ingreso_monto"
                   placeholder="Ingrese Monto"
-                  type="text"
-                  className="h-12"
+                  type="number"
+                  className="h-12 px-4 border rounded-md w-full"
                 />
-                <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md mt-2 mb-2 w-48">
+                <button
+                  type="button"
+                  className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md h-12"
+                >
                   Agregar dinero en Caja
                 </button>
               </div>
-              <h1 className="mt-4 mb-2 border-b pb-2">Egresos</h1>
-              <div className=" flex flex-row grid-flow-col gap-10 mt-6">
+            </div>
+
+            {/* Egresos */}
+            <div>
+              <h2 className="text-lg font-bold border-b pb-2 mb-4">Egresos</h2>
+              <div className="flex flex-col md:flex-row gap-4">
                 <input
+                  name="egreso_motivo"
                   placeholder="Motivo del Retiro"
                   type="text"
-                  className="h-12"
+                  className="h-12 px-4 border rounded-md w-full"
                 />
-                <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md mt-2 mb-2 w-48">
+                <input
+                  name="egreso_monto"
+                  placeholder="Ingrese Monto"
+                  type="number"
+                  className="h-12 px-4 border rounded-md w-full"
+                />
+                <button
+                  type="button"
+                  className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md h-12"
+                >
                   Retirar dinero en Caja
                 </button>
               </div>
-              <div className=" flex flex-row grid-flow-col gap-10 mt-6">
-                <input
-                  placeholder="Ingrese Monto"
-                  type="text"
-                  className="h-12"
-                />
-              </div>
-              <h1 className="mt-4 mb-2 border-b pb-2">
+            </div>
+
+            {/* Filtros */}
+            <div>
+              <h2 className="text-lg font-bold border-b pb-2 mb-4">
                 Movimientos de Caja - Filtros
-              </h1>
-              <div className=" flex flex-row grid-flow-col gap-10 mt-6 ">
+              </h2>
+
+              <div className="flex flex-col md:flex-row gap-4">
                 <input
+                  name="fecha_inicio"
                   type="date"
-                  placeholder="Fecha Inicio"
-                  className="px-10"
+                  className="h-12 px-4 border rounded-md w-full"
                 />
-                <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md mt-2 mb-2 w-48">
+                <button
+                  type="button"
+                  className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md h-12"
+                >
                   Ingresos Caja
                 </button>
               </div>
-              <div className=" flex flex-row grid-flow-col gap-10 mt-6">
+
+              <div className="flex flex-col md:flex-row gap-4 mt-4">
                 <input
+                  name="fecha_final"
                   type="date"
-                  placeholder="Fecha Final"
-                  className="px-10"
+                  className="h-12 px-4 border rounded-md w-full"
                 />
-                <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md mt-2 mb-2 w-48">
+                <button
+                  type="button"
+                  className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md h-12"
+                >
                   Egresos Caja
                 </button>
               </div>
-              <div className=" flex flex-col grid-flow-col gap-10 mt-6 ml-64">
-                <button className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md mt-2 mb-2 w-48">
+
+              <div className="flex justify-end mt-6">
+                <button
+                  type="button"
+                  className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md w-48 h-12"
+                >
                   Movimientos Caja
                 </button>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>

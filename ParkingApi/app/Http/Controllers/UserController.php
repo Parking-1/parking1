@@ -1,112 +1,121 @@
 <?php
 
 namespace App\Http\Controllers;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Rol;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Http\JsonResponse;
-use App\Interface\IPdf;
-use Exception;
-use JWTAuth;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
-
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Exception;
 
 class UserController extends Controller
 {
+    public function __construct()
+{
+    $this->middleware('auth:api', [
+        'except' => ['register', 'authenticate', 'GetIfExistsEmail']
+    ]);
+}
 
-    public function authenticate(Request $request)
+    public function authenticate(Request $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
+
         try {
-            if (! $token = JWTAuth::attempt($credentials)) {
-                return response()->json(['error' => 'invalid_credentials'], 400);
+            if (!$token = JWTAuth::attempt($credentials)) {
+                return response()->json(['error' => 'Credenciales inválidas'], 401);
             }
+            return response()->json(compact('token'), 200);
         } catch (JWTException $e) {
-            return response()->json(['error' => 'could_not_create_token'], 500);
-        }
-        return response()->json(compact('token'));
-    }
-    public function GetIfExistsEmail(Request $user){
-        try{
-            $exist = User::where("email", $user->email)->exists();
-            if(!$exist) throw new ModelNotFoundException();
-            return response($exist, 200);
-        }catch(ModelNotFoundException $e){
-            return response(false, 404);
-        }catch(Exception){
-            return response(false, 500);
+            return response()->json(['error' => 'No se pudo crear el token'], 500);
         }
     }
-    public function getAuthenticatedUser()
+
+    public function getAuthenticatedUser(): JsonResponse
     {
         try {
-            if (!$user = JWTAuth::parseToken()->authenticate()) {
-                    return response()->json(['user_not_found'], 404);
+            $user = JWTAuth::parseToken()->authenticate();
+            if (!$user) {
+                return response()->json(['error' => 'Usuario no encontrado'], 404);
             }
-            } catch (Tymon\JWTAuth\Exceptions\TokenExpiredException $e) {
-                    return response()->json(['token_expired'], $e->getStatusCode());
-            } catch (Tymon\JWTAuth\Exceptions\TokenInvalidException $e) {
-                    return response()->json(['token_invalid'], $e->getStatusCode());
-            } catch (Tymon\JWTAuth\Exceptions\JWTException $e) {
-                    return response()->json(['token_absent'], $e->getStatusCode());
-            }
-            return response()->json(compact('user'));
-    }
-    public function logOut() : JsonResponse{
-        try {
-            // Adds token to blacklist.
-            $forever = true;
-            JWTAuth::parseToken()->invalidate( $forever );
-
-            return response()->json( [
-                'error'   => false,
-                'message' => trans( 'auth.logged_out' )
-            ] );
-        } catch ( TokenExpiredException $exception ) {
-            return response()->json( [
-                'error'   => true,
-                'message' => trans( 'auth.token.expired' )
-
-            ], 401 );
-        } catch ( TokenInvalidException $exception ) {
-            return response()->json( [
-                'error'   => true,
-                'message' => trans( 'auth.token.invalid' )
-            ], 401 );
-
-        } catch ( JWTException $exception ) {
-            return response()->json( [
-                'error'   => true,
-                'message' => trans( 'auth.token.missing' )
-            ], 500 );
+            return response()->json(compact('user'), 200);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['error' => 'Token expirado'], $e->getStatusCode());
+        } catch (TokenInvalidException $e) {
+            return response()->json(['error' => 'Token inválido'], $e->getStatusCode());
+        } catch (JWTException $e) {
+            return response()->json(['error' => 'Token ausente'], $e->getStatusCode());
         }
     }
-    public function register(Request $request)
-        {
-                $validator = Validator::make($request->all(), [
-                'name' => 'required|string|max:255',
-                'email' => 'required|string|email|max:255|unique:users',
-                'password' => 'required|string|min:6|confirmed',
+
+    public function logOut(): JsonResponse
+    {
+        try {
+            JWTAuth::parseToken()->invalidate(true);
+            return response()->json([
+                'error' => false,
+                'message' => 'Sesión cerrada correctamente'
+            ]);
+        } catch (TokenExpiredException $e) {
+            return response()->json(['error' => true, 'message' => 'Token expirado'], 401);
+        } catch (TokenInvalidException $e) {
+            return response()->json(['error' => true, 'message' => 'Token inválido'], 401);
+        } catch (JWTException $e) {
+            return response()->json(['error' => true, 'message' => 'Token no válido'], 500);
+        }
+    }
+
+    public function register(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
+            'id_cargo' => 'required|integer'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        try {
+            $rol = Rol::where('nombre', 'empleado')->firstOrFail();
+
+            $user = User::create([
+                'name'     => $request->get('name'),
+                'email'    => $request->get('email'),
+                'password' => Hash::make($request->get('password')),
+                'id_cargo' => $request->get('id_cargo')
             ]);
 
-            if($validator->fails()){
-                    return response()->json($validator->errors()->toJson(), 400);
-            }
-            $rol = Rol::where("nombre", "empleado")->get();
-            $user = User::create([
-                'name' => $request->get('name'),
-                'email' => $request->get('email'),
-                'password' => Hash::make($request->get('password')),
-                'id_cargo' => $request['id_cargo']
-            ]);
-            $user->rol()->sync($rol[0]->id);
+            $user->rol()->sync([$rol->id]);
+
             $token = JWTAuth::fromUser($user);
 
-            return response()->json(compact('user','token'),201);
-        }
+            return response()->json(compact('user', 'token'), 201);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Rol no encontrado'], 404);
+        } catch (Exception $e) {
+    return response()->json(['error' => 'Error al registrar el usuario', 'message' => $e->getMessage()], 500);
 }
+
+    }
+
+    public function GetIfExistsEmail(Request $request): JsonResponse
+    {
+        try {
+            $exists = User::where('email', $request->email)->exists();
+            return response()->json(['exists' => $exists], $exists ? 200 : 404);
+        } catch (Exception $e) {
+            return response()->json(['exists' => false, 'error' => 'Error de servidor'], 500);
+        }
+    }
+}
+

@@ -1,21 +1,28 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VehiculoController;
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
-Route::get("ap/", function(){
-    return 1;
+
+Route::prefix("vehiculo")->group(function () {
+
+    // Crear vehículos
+    Route::post("/", [VehiculoController::class, "save"]);
+    Route::post("/addrange", [VehiculoController::class, "AddRange"]);
+
+    // Lectura especializada (rutas específicas deben ir antes de /{id})
+    Route::get("/with-cliente", [VehiculoController::class, "GetWithCliente"]);
+    Route::get("/grouped", [VehiculoController::class, "GetGroupVehiculos"]);
+    Route::get("/report", [VehiculoController::class, "GetReport"]);
+
+    // Lectura general
+    Route::get("/", [VehiculoController::class, "GetPaginate"]);
+    Route::get("/{id}", [VehiculoController::class, "GetById"]);
+
+    // Eliminación
+    Route::delete("/{id}", [VehiculoController::class, "Delete"]);
+    Route::delete("/", [VehiculoController::class, "DeleteRange"]);
+
+    // Actualización
+    Route::put("/{id}", [VehiculoController::class, "Update"]);
 });
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+

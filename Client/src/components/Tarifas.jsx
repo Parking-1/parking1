@@ -1,4 +1,4 @@
-import  { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
@@ -6,6 +6,9 @@ import Sidebar from "./Sidebar";
 const Tarifas = () => {
   const url = "http://localhost:8080/api/tarifa";
   const [tarifas, setTarifas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+
   const [formValues, setFormValues] = useState({
     claseVehiculo: "",
     precioHora: "",
@@ -13,19 +16,18 @@ const Tarifas = () => {
     precioLavado: "",
   });
 
-  useEffect(() => {
-    getTarifas();
-  }, []);
-
-  const getTarifas = async () => {
+  const fetchTarifas = async () => {
     try {
       const response = await axios.get(url);
-      console.log(response.data.data);
       setTarifas(response.data.data || []);
     } catch (error) {
-      console.error("Error fetching tarifas", error);
+      console.error("Error al obtener tarifas", error);
     }
   };
+
+  useEffect(() => {
+    fetchTarifas();
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -34,123 +36,169 @@ const Tarifas = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await axios.post(url, {
-        id_tipo_vehiculo: formValues.claseVehiculo,
-        tipo_tarifa: "hora", // Suponiendo que el tipo de tarifa sea "hora"
-        precio_base: formValues.precioHora, // Puedes cambiar esto para usar los diferentes precios
-      });
-      setTarifas([...tarifas, response.data.data]);
-    } catch (error) {
-      console.error("Error saving tarifa", error);
+    const { claseVehiculo, precioHora, precioDia, precioLavado } = formValues;
+
+    if (
+      [precioHora, precioDia, precioLavado].some((v) => isNaN(v) || v === "")
+    ) {
+      alert("Todos los precios deben ser números válidos.");
+      return;
     }
+
+    setLoading(true);
+
+    try {
+      if (editingId) {
+        const response = await axios.put(`${url}/${editingId}`, {
+          id_tipo_vehiculo: claseVehiculo,
+          precio_base: precioHora,
+          precio_dia: precioDia,
+          precio_lavado: precioLavado,
+        });
+        setTarifas(
+          tarifas.map((t) => (t.id === editingId ? response.data.data : t))
+        );
+        setEditingId(null);
+      } else {
+        const response = await axios.post(url, {
+          id_tipo_vehiculo: claseVehiculo,
+          tipo_tarifa: "hora",
+          precio_base: precioHora,
+          precio_dia: precioDia,
+          precio_lavado: precioLavado,
+        });
+        setTarifas([...tarifas, response.data.data]);
+      }
+      setFormValues({
+        claseVehiculo: "",
+        precioHora: "",
+        precioDia: "",
+        precioLavado: "",
+      });
+    } catch (error) {
+      console.error("Error al guardar la tarifa", error);
+    }
+    setLoading(false);
   };
 
-  const handleEdit =() =>{}
+  const handleEdit = (tarifa) => {
+    setFormValues({
+      claseVehiculo: tarifa.id_tipo_vehiculo,
+      precioHora: tarifa.precio_base,
+      precioDia: tarifa.precio_dia,
+      precioLavado: tarifa.precio_lavado,
+    });
+    setEditingId(tarifa.id);
+  };
 
-  const handleDelete =() =>{}
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${url}/${id}`);
+      setTarifas(tarifas.filter((t) => t.id !== id));
+    } catch (error) {
+      console.error("Error al eliminar la tarifa", error);
+    }
+  };
 
   return (
     <div>
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <div className="flex flex-col justify-center items-center mx-auto my-30">
-          <div className="flex">
-            <div className="mr-40">
-              <form
-                className="flex flex-col items-center justify-center"
-                onSubmit={handleSubmit}
+        <div className="flex flex-col justify-center items-center mx-auto my-12 w-full">
+          <div className="flex flex-col md:flex-row w-full max-w-6xl p-6 gap-8">
+            <form onSubmit={handleSubmit} className="w-full md:w-1/3 space-y-4">
+              <input
+                type="text"
+                name="claseVehiculo"
+                placeholder="Clase de Vehículo"
+                className="w-full py-2 px-4 border rounded"
+                value={formValues.claseVehiculo}
+                onChange={handleChange}
+              />
+              <input
+                type="text"
+                name="precioHora"
+                placeholder="Precio por Hora"
+                className="w-full py-2 px-4 border rounded"
+                value={formValues.precioHora}
+                onChange={handleChange}
+              />
+              <input
+                type="text"
+                name="precioDia"
+                placeholder="Precio por Día"
+                className="w-full py-2 px-4 border rounded"
+                value={formValues.precioDia}
+                onChange={handleChange}
+              />
+              <input
+                type="text"
+                name="precioLavado"
+                placeholder="Precio por Lavado"
+                className="w-full py-2 px-4 border rounded"
+                value={formValues.precioLavado}
+                onChange={handleChange}
+              />
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
               >
-                <input
-                  type="text"
-                  name="claseVehiculo"
-                  placeholder="Clase de Vehiculo"
-                  className="mb-6 w-48 py-2 px-4"
-                  value={formValues.claseVehiculo}
-                  onChange={handleChange}
-                />
-                <input
-                  type="text"
-                  name="precioHora"
-                  placeholder="Precio por Hora"
-                  className="mb-6 w-48 py-2 px-4"
-                  value={formValues.precioHora}
-                  onChange={handleChange}
-                />
-                <input
-                  type="text"
-                  name="precioDia"
-                  placeholder="Precio por Dia"
-                  className="mb-6 w-48 py-2 px-4"
-                  value={formValues.precioDia}
-                  onChange={handleChange}
-                />
-                <input
-                  type="text"
-                  name="precioLavado"
-                  placeholder="Precio por Lavado"
-                  className="mb-6 w-48 py-2 px-4"
-                  value={formValues.precioLavado}
-                  onChange={handleChange}
-                />
-                <div className="flex flex-col gap-2">
-                  <button
-                    type="submit"
-                    className="bg-green-500 text-white font-bold py-2 px-4 rounded-md mt-6 mb-2 w-48"
-                  >
-                    Agregar Tarifa
-                  </button>
-                  <button
-                    type="button"
-                    className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md mt-2 mb-2 w-48"
-                  >
-                    Editar Tarifa
-                  </button>
-                </div>
-              </form>
-            </div>
-            <div>
-              <table className="border-solid bg-slate-50 w-100 h-80">
-                <thead className="flex flex-row gap-6 text-white font-bold py-2 px-4 bg-blue-400 ">
+                {editingId
+                  ? "Actualizar Tarifa"
+                  : loading
+                  ? "Guardando..."
+                  : "Agregar Tarifa"}
+              </button>
+            </form>
+
+            <div className="w-full md:w-2/3 overflow-x-auto">
+              <table className="w-full bg-white border border-gray-200 shadow-md">
+                <thead className="bg-blue-400 text-white">
                   <tr>
-                    <th>Clase de Vehiculo</th>
-                    <th>Precio por hora o fraccion</th>
-                    <th>Precio por Dia</th>
-                    <th>Precio Adicional</th>
+                    <th className="p-2">Clase Vehículo</th>
+                    <th className="p-2">Precio Hora</th>
+                    <th className="p-2">Precio Día</th>
+                    <th className="p-2">Precio Lavado</th>
+                    <th className="p-2">Acciones</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {Array.isArray(tarifas) &&
-                    tarifas.map((tarifa) => (
-                      <tr key={tarifa.id}>
-                        <td>{tarifa.id_tipo_vehiculo}</td>
-                        <td>{tarifa.precio_base}</td>
-                        <td>{tarifa.precio_dia}</td>
-                        <td>{tarifa.precio_lavado}</td>
-                        <td>
-                          <button
-                            onClick={() => handleEdit(tarifa)}
-                            className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md mt-2 mb-2"
-                          >
-                            Editar
-                          </button>
-                          <button
-                            onClick={() => handleDelete(tarifa.id)}
-                            className="bg-red-500 text-white font-bold py-2 px-4 rounded-md mt-2 mb-2"
-                          >
-                            Eliminar
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                  {tarifas.map((tarifa) => (
+                    <tr key={tarifa.id} className="text-center">
+                      <td className="p-2">{tarifa.id_tipo_vehiculo}</td>
+                      <td className="p-2">{tarifa.precio_base}</td>
+                      <td className="p-2">{tarifa.precio_dia}</td>
+                      <td className="p-2">{tarifa.precio_lavado}</td>
+                      <td className="p-2 flex justify-center gap-2">
+                        <button
+                          className="bg-blue-500 text-white px-3 py-1 rounded"
+                          onClick={() => handleEdit(tarifa)}
+                        >
+                          Editar
+                        </button>
+                        <button
+                          className="bg-red-500 text-white px-3 py-1 rounded"
+                          onClick={() => handleDelete(tarifa.id)}
+                        >
+                          Eliminar
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {tarifas.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan="5"
+                        className="text-center py-4 text-gray-500"
+                      >
+                        No hay tarifas registradas.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
-              <div className="flex items-center justify-center">
-                <button className="bg-red-500 text-white font-bold py-2 px-4 rounded-md mt-6 w-48">
-                  Eliminar
-                </button>
-              </div>
             </div>
           </div>
         </div>

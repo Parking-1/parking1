@@ -5,7 +5,6 @@ import ForgetPassword from "./pages/auth/ForgetPassword";
 import ChangePassword from "./pages/auth/ChangePassword";
 import Home from "./pages/auth/Home";
 import Tarifas from "./components/Tarifas";
-import Error404 from "./pages/404";
 import Ingresos from "./components/Ingresos";
 import Salidas from "./components/Salidas";
 import Abonados from "./components/Abonados";
@@ -13,15 +12,16 @@ import Caja from "./components/Caja";
 import Usuarios from "./components/Usuarios";
 import Reportes from "./components/Reportes";
 import Pagos from "./components/Pagos";
+import Error404 from "./pages/404"; // Mover al final de imports para coherencia
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="register" element={<Register />} />
-        <Route path="forgetpassword" element={<ForgetPassword />} />
-        <Route path="changepassword/:id" element={<ChangePassword />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="/forgetpassword" element={<ForgetPassword />} />
+        <Route path="/changepassword/:id" element={<ChangePassword />} />
         <Route path="/home" element={<Home />} />
         <Route path="/tarifas" element={<Tarifas />} />
         <Route path="/ingresos" element={<Ingresos />} />

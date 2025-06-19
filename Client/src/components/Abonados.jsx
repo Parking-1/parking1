@@ -7,84 +7,114 @@ const Abonados = () => {
       <Navbar />
       <div className="flex flex-wrap">
         <Sidebar />
-        <div className=" m-auto w-100">
-          <div className=" w-100">
-            <form className="w-100">
-              <div className=" grid grid-rows grid-flow-col  w-100">
-                <button className="bg-green-500 text-white font-bold py-2 px-4 rounded-md m-2  h-12">
-                  Buscar Abonado
-                </button>
+        <div className="m-auto w-full max-w-screen-lg p-4">
+          <form className="space-y-6">
+            <div className="grid grid-cols-4 gap-4">
+              <input
+                name="nombre"
+                className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase"
+                type="text"
+                placeholder="Nombres y Apellidos"
+              />
+              <input
+                name="documento"
+                className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase"
+                type="text"
+                placeholder="Nro de Documento"
+              />
+              <input
+                name="placa"
+                className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase"
+                type="text"
+                placeholder="Placa de Vehiculo"
+              />
+              <button
+                type="button"
+                className="bg-green-500 text-white font-bold rounded-md h-12"
+              >
+                Buscar Abonado
+              </button>
+            </div>
 
-                <input
-                  className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase m-2 "
-                  type="text"
-                  placeholder="Nombres y Apellidos"
-                />
-                <input
-                  className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase m-2"
-                  type="text"
-                  placeholder="Nro de Documento"
-                />
-                <input
-                  className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase m-2"
-                  type="text"
-                  placeholder="Placa de Vehiculo"
-                />
-              </div>
-              <div className=" grid grid-rows grid-flow-col w-100 mt-10">
-                <input
-                  className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase mb-4 mr-6 "
-                  type="text"
-                  placeholder="Monto x Sem. o Mes."
-                />
-                <select className=" h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase mb-4 mr-6 ">
-                  Duracion del Plan
-                  <option>15 dias</option>
-                  <option>30 dias</option>
-                  <option>60 dias</option>
-                </select>
-                <select className=" h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase mb-4 mr-6 ">
-                  Tipo de Plan (Mensual - Semanal)
-                  <option>Semanal</option>
-                  <option>Mensual</option>
-                </select>
-                <button className="bg-green-500 text-white font-bold py-2 px-4 rounded-md mb-4 w-48 h-12">
-                  Calcular Plan
-                </button>
-              </div>
-              <div className=" grid grid-rows grid-flow-col  w-100">
-                <input
-                  className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase mb-4 mr-6"
-                  type="date"
-                  placeholder="Fecha de Inicio del Plan"
-                />
-                <input
-                  className="w-1/4 h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase mb-4 mr-6"
-                  type="number"
-                  placeholder="Total del Plan"
-                />
-              </div>
-              <div className=" grid grid-rows grid-flow-col  w-100">
-                <table>
-                  <thead>
-                    <td>Nro</td>
-                    <td>Dia Pago</td>
-                    <td>Fecha</td>
-                    <td>Pago</td>
-                  </thead>
-                  <tbody>
+            <div className="grid grid-cols-4 gap-4">
+              <input
+                name="monto"
+                className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase"
+                type="text"
+                placeholder="Monto x Sem. o Mes."
+              />
+              <select
+                name="duracion"
+                className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase"
+              >
+                <option disabled selected>
+                  Duración del Plan
+                </option>
+                <option>15 días</option>
+                <option>30 días</option>
+                <option>60 días</option>
+              </select>
+              <select
+                name="tipo_plan"
+                className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase"
+              >
+                <option disabled selected>
+                  Tipo de Plan
+                </option>
+                <option>Semanal</option>
+                <option>Mensual</option>
+              </select>
+              <button
+                type="button"
+                className="bg-green-500 text-white font-bold rounded-md h-12"
+              >
+                Calcular Plan
+              </button>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <input
+                name="fecha_inicio"
+                className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase"
+                type="date"
+              />
+              <input
+                name="total"
+                className="h-12 px-4 py-2 rounded-lg border border-gray-300 text-lg uppercase"
+                type="number"
+                placeholder="Total del Plan"
+              />
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full border text-center">
+                <thead className="bg-gray-200">
+                  <tr>
+                    <th>Nro</th>
+                    <th>Día Pago</th>
+                    <th>Fecha</th>
+                    <th>Pago</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
                     <td>1</td>
                     <td>Viernes</td>
                     <td>27 de Mayo de 2023</td>
                     <td>100.00</td>
-                  </tbody>
-                </table>
-                <button className="bg-green-500 text-white font-bold py-2 px-4 rounded-md mt-6 mb-2 w-48 h-12">
+                  </tr>
+                </tbody>
+              </table>
+              <div className="mt-4 text-right">
+                <button
+                  type="submit"
+                  className="bg-green-500 text-white font-bold py-2 px-4 rounded-md"
+                >
                   Grabar Plan
                 </button>
               </div>
-            </form>
-          </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>

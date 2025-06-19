@@ -1,40 +1,29 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
+import InputWithIcon from "../../components/InputWithIcon";
+import SelectWithIcon from "../../components/SelectWithIcon"; // al inicio del archivo
 import {
   RiMailLine,
   RiLockLine,
-  RiEyeLine,
-  RiEyeOffLine,
   RiUser2Line,
+  RiAdminLine,
 } from "react-icons/ri";
-import Axios from "axios"; // Importa Axios
+import Axios from "axios";
 import { toast } from "react-toastify";
 
 const Register = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [name, setName] = useState("");
-  const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordStrength, setPasswordStrength] = useState("");
   const [passwordMatch, setPasswordMatch] = useState(true);
+  const [idCargo, setIdCargo] = useState(1); // Valor por defecto
 
   const handleShowPassword = () => {
     setShowPassword(!showPassword);
-  };
-
-  const handleNameChange = (e) => {
-    setName(e.target.value);
-  };
-
-  const handleLastnameChange = (e) => {
-    setLastname(e.target.value);
-  };
-
-  const handleEmailChange = (e) => {
-    setEmail(e.target.value);
   };
 
   const handlePasswordChange = (e) => {
@@ -51,83 +40,78 @@ const Register = () => {
   };
 
   const evaluatePasswordStrength = (password) => {
-    // Evaluar la fortaleza de la contraseña aquí
-    // Puedes implementar tus propios criterios para determinar la fortaleza
     let strength = "Débil";
-
-    // Se define una expresión regular para cada criterio
     const regexLowercase = /[a-z]/;
     const regexUppercase = /[A-Z]/;
     const regexNumber = /[0-9]/;
     const regexSpecialChar = /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/;
 
-    if (password.length >= 8) {
-      strength = "Moderada";
-    } else if (
+    if (
+      password.length >= 8 &&
       regexLowercase.test(password) &&
       regexUppercase.test(password) &&
       regexNumber.test(password) &&
       regexSpecialChar.test(password)
     ) {
-      // Si la contraseña cumple con todos los criterios, se considera 'Fuerte'
       strength = "Fuerte";
+    } else if (password.length >= 8) {
+      strength = "Moderada";
     }
+
     setPasswordStrength(strength);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if ([name, /*lastname,*/ email, password, confirmPassword].includes("")) {
-      toast.error("Todos los campos son obligatorios", {
-        theme: "dark",
-      });
+    if ([name, email, password, confirmPassword].includes("")) {
+      toast.error("Todos los campos son obligatorios", { theme: "dark" });
       return;
     }
+
     if (password.length < 6) {
-      toast.error("El password debe contener al menos 6 caracteres", {
+      toast.error("La contraseña debe tener al menos 6 caracteres", {
         theme: "dark",
       });
       return;
     }
 
     if (password !== confirmPassword) {
-      toast.error("Los passwords no son iguales", {
-        theme: "dark",
-      });
+      toast.error("Las contraseñas no coinciden", { theme: "dark" });
       return;
     }
-    //Validar que el email no exista en la base de datos
+    if (![1, 2].includes(idCargo)) {
+      toast.error("Cargo inválido", { theme: "dark" });
+      return;
+    }
+
     try {
-      // Realiza la solicitud POST al backend
       const response = await Axios.post(
-        "http://localhost:8000/api/user/register",
+        "http://localhost:8020/api/user/register",
         {
           name,
-          //lastname,
           email,
           password,
           password_confirmation: confirmPassword,
-          //confirmPassword,
+          id_cargo: idCargo,
         }
       );
 
-      // Maneja la respuesta del backend
-      console.log("Registro exitoso:", response.data);
       toast.success("Registro exitoso", { theme: "dark" });
-
-      // Redirige al usuario a otra página, como la página de inicio de sesión
-      // history.push("/login");
+      navigate("/");
     } catch (error) {
-      // Maneja los errores de la solicitud
       console.error("Error al registrar:", error);
-      toast.error("Error al registrar. Por favor, inténtalo de nuevo.", {
-        theme: "dark",
-      });
+
+      if (error.response && error.response.data.email) {
+        toast.error("El correo ya está registrado", { theme: "dark" });
+      } else {
+        toast.error("Error al registrar. Por favor, inténtalo de nuevo.", {
+          theme: "dark",
+        });
+      }
     }
   };
 
-  // Enviar email de verificacion
   return (
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="bg-white p-8 rounded-lg w-full md:w-[500px]">
@@ -137,97 +121,78 @@ const Register = () => {
           </h1>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="relative flex items-center">
-            <RiUser2Line className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
-            <input
-              type="text"
-              className="w-full border-gray-200 outline-none py-2 px-8 rounded-lg"
-              placeholder="Nombre(s)"
-              value={name}
-              onChange={handleNameChange}
-            />
-          </div>
-          <div className="relative flex items-center">
-            <RiUser2Line className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
-            <input
-              type="text"
-              className="w-full border-gray-200 outline-none py-2 px-8 rounded-lg"
-              placeholder="Apellidos"
-              value={lastname}
-              onChange={handleLastnameChange}
-            />
-          </div>
-          <div className="relative flex items-center">
-            <RiMailLine className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
-            <input
-              type="email"
-              className="w-full border-gray-200 outline-none py-2 px-8 rounded-lg"
-              placeholder="Correo-electronico"
-              value={email}
-              onChange={handleEmailChange}
-            />
-          </div>
-          <div className="relative flex items-center">
-            <RiLockLine className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
-            <input
-              type={showPassword ? "text" : "password"}
-              className="w-full border-gray-200 outline-none py-2 px-8 rounded-lg"
-              placeholder="Crear-contraseña"
-              value={password}
-              onChange={handlePasswordChange}
-            />
-            {showPassword ? (
-              <RiEyeOffLine
-                onClick={handleShowPassword}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:cursor-pointer"
-              />
-            ) : (
-              <RiEyeLine
-                onClick={handleShowPassword}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:cursor-pointer"
-              />
-            )}
-          </div>
-          <div className="relative">
-            <RiLockLine className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500" />
-            <input
-              type={showPassword ? "text" : "password"}
-              className="w-full border-gray-200 outline-none py-2 px-8 rounded-lg"
-              placeholder="Confirmar-contraseña"
-              value={confirmPassword}
-              onChange={handleConfirmPasswordChange}
-            />
-            {showPassword ? (
-              <RiEyeOffLine
-                onClick={handleShowPassword}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:cursor-pointer"
-              />
-            ) : (
-              <RiEyeLine
-                onClick={handleShowPassword}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-500 hover:cursor-pointer"
-              />
-            )}
-          </div>
+          <InputWithIcon
+            icon={RiUser2Line}
+            placeholder="Nombre(s)"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <InputWithIcon
+            icon={RiMailLine}
+            type="email"
+            placeholder="Correo electrónico"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <InputWithIcon
+            icon={RiLockLine}
+            placeholder="Crear contraseña"
+            value={password}
+            showToggle={true}
+            showPassword={showPassword}
+            onTogglePassword={handleShowPassword}
+            onChange={handlePasswordChange}
+          />
+          <InputWithIcon
+            icon={RiLockLine}
+            placeholder="Confirmar contraseña"
+            value={confirmPassword}
+            showToggle={true}
+            showPassword={showPassword}
+            onTogglePassword={handleShowPassword}
+            onChange={handleConfirmPasswordChange}
+          />
           {!passwordMatch && (
             <p className="text-red-500 text-xs mt-1">
               Las contraseñas no coinciden
             </p>
           )}
+          <SelectWithIcon
+            icon={RiAdminLine}
+            value={idCargo}
+            onChange={(e) => setIdCargo(parseInt(e.target.value))}
+            options={[
+              { value: 1, label: "Empleado" },
+              { value: 2, label: "Administrador" },
+            ]}
+          />
           <div>
             <button
+              type="submit"
               disabled={!passwordMatch}
-              onClick={handleSubmit}
-              className="mt-6 bg-sky-600 text-white w-full py-2 px-6 rounded-lg hover:scale-105 transition-all"
+              className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                passwordMatch
+                  ? "bg-sky-600 text-white hover:bg-sky-700"
+                  : "bg-gray-400 text-white cursor-not-allowed"
+              }`}
             >
               Crear cuenta
             </button>
-            <div className="text-xs text-gray-500">
+
+            <div
+              className={`text-xs mt-1 ${
+                passwordStrength === "Fuerte"
+                  ? "text-green-600"
+                  : passwordStrength === "Moderada"
+                  ? "text-yellow-600"
+                  : "text-red-600"
+              }`}
+            >
               Fortaleza de la contraseña: {passwordStrength}
             </div>
           </div>
         </form>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mt-4">
           <div>
             ¿Ya tienes una cuenta?{" "}
             <Link
@@ -242,7 +207,7 @@ const Register = () => {
               to="/forgetpassword"
               className="text-sky-600 font-medium hover:underline transition-all"
             >
-              ¿Olvidaste tu password?{" "}
+              ¿Olvidaste tu contraseña?
             </Link>
           </div>
         </div>
