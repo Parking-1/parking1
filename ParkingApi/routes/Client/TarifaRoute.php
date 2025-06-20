@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TarifaController;
 
-Route::prefix("tarifa")->group(function () {
+Route::prefix("tarifa")->middleware('jwt.cookie')->group(function () {
     // Crear
     Route::post("/", [TarifaController::class, "save"]);
     Route::post("/addrange", [TarifaController::class, "AddRange"]);
@@ -19,5 +19,6 @@ Route::prefix("tarifa")->group(function () {
     // Actualización
     Route::put("/{id}", [TarifaController::class, "Update"]);
 });
+
 
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   RiMailLine,
@@ -16,6 +16,14 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // 👉 Redirigir si ya hay un token guardado
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/home");
+    }
+  }, []);
+
   const handleShowPassword = () => setShowPassword(!showPassword);
 
   const handleSubmit = async (e) => {
@@ -30,10 +38,17 @@ const Login = () => {
     try {
       const response = await Axios.post(
         "http://localhost:8000/api/user/login",
-        { email, password }
+        { email, password },
+        { withCredentials: true } // Para cookies
       );
-      const token = response.data.token;
-      localStorage.setItem("token", token);
+
+      // Guardar token si lo recibes
+      const token = response.data?.token;
+      if (token) {
+        localStorage.setItem("token", token);
+      }
+
+      toast.success("Inicio de sesión exitoso", { theme: "dark" });
       navigate("/home");
     } catch (error) {
       const message =

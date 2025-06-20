@@ -1,8 +1,9 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TransaccionController;
 
-Route::prefix("transaccion")->group(function () {
+Route::prefix("transaccion")->middleware('jwt.cookie')->group(function () {
 
     // Crear una o varias transacciones
     Route::post("/", [TransaccionController::class, "save"]);
@@ -10,7 +11,7 @@ Route::prefix("transaccion")->group(function () {
 
     // Lectura de transacciones
     Route::get("/", [TransaccionController::class, "GetPaginate"]);
-    Route::get("/between/vehiculo", [TransaccionController::class, "GetBetween"]); // ← corregido
+    Route::get("/between/vehiculo", [TransaccionController::class, "GetBetween"]);
     Route::get("/{id}", [TransaccionController::class, "GetById"]);
 
     // Eliminación
@@ -20,5 +21,6 @@ Route::prefix("transaccion")->group(function () {
     // Actualización
     Route::put("/{id}", [TransaccionController::class, "Update"]);
 });
+
 
 

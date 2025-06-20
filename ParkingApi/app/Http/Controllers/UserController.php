@@ -1,7 +1,6 @@
 <?php
 
 namespace App\Http\Controllers;
-
 use App\Models\User;
 use App\Models\Rol;
 use Illuminate\Http\Request;
@@ -18,11 +17,14 @@ use Exception;
 class UserController extends Controller
 {
     public function __construct()
-{
-    $this->middleware('auth:api', [
-        'except' => ['register', 'authenticate', 'GetIfExistsEmail']
-    ]);
-}
+    {
+        $this->middleware('jwt.cookie')->except([
+            'register',
+            'authenticate',
+            'GetIfExistsEmail'
+        ]);
+    }
+
 
     public function authenticate(Request $request): JsonResponse
     {
@@ -32,7 +34,9 @@ class UserController extends Controller
             if (!$token = JWTAuth::attempt($credentials)) {
                 return response()->json(['error' => 'Credenciales inválidas'], 401);
             }
-            return response()->json(compact('token'), 200);
+            // Enviar token como cookie HTTP-only
+            return response()->json(['message' => 'Autenticado correctamente'])
+            ->withCookie(cookie('token', $token, 60, '/', null, false, true, false, 'Strict'));
         } catch (JWTException $e) {
             return response()->json(['error' => 'No se pudo crear el token'], 500);
         }
@@ -59,10 +63,9 @@ class UserController extends Controller
     {
         try {
             JWTAuth::parseToken()->invalidate(true);
-            return response()->json([
-                'error' => false,
-                'message' => 'Sesión cerrada correctamente'
-            ]);
+            return response()->json(['message' => 'Sesión cerrada'])
+        ->withCookie(cookie()->forget('token'));
+
         } catch (TokenExpiredException $e) {
             return response()->json(['error' => true, 'message' => 'Token expirado'], 401);
         } catch (TokenInvalidException $e) {
@@ -103,9 +106,8 @@ class UserController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => 'Rol no encontrado'], 404);
         } catch (Exception $e) {
-    return response()->json(['error' => 'Error al registrar el usuario', 'message' => $e->getMessage()], 500);
-}
-
+            return response()->json(['error' => 'Error al registrar el usuario', 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function GetIfExistsEmail(Request $request): JsonResponse

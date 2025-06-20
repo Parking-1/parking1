@@ -3,13 +3,13 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VehiculoController;
 
-Route::prefix("vehiculo")->group(function () {
+Route::prefix("vehiculo")->middleware('jwt.cookie')->group(function () {
 
     // Crear vehículos
     Route::post("/", [VehiculoController::class, "save"]);
     Route::post("/addrange", [VehiculoController::class, "AddRange"]);
 
-    // Lectura especializada (rutas específicas deben ir antes de /{id})
+    // Lectura especializada
     Route::get("/with-cliente", [VehiculoController::class, "GetWithCliente"]);
     Route::get("/grouped", [VehiculoController::class, "GetGroupVehiculos"]);
     Route::get("/report", [VehiculoController::class, "GetReport"]);
@@ -25,4 +25,5 @@ Route::prefix("vehiculo")->group(function () {
     // Actualización
     Route::put("/{id}", [VehiculoController::class, "Update"]);
 });
+
 

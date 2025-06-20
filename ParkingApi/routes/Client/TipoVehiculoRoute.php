@@ -2,7 +2,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TipoVehiculoController;
 
-Route::prefix("tipovehiculo")->group(function () {
+Route::prefix("tipovehiculo")->middleware('jwt.cookie')->group(function () {
     // Crear uno o varios
     Route::post("/", [TipoVehiculoController::class, "store"]);
     Route::post("/addrange", [TipoVehiculoController::class, "AddRange"]);
@@ -18,5 +18,6 @@ Route::prefix("tipovehiculo")->group(function () {
     // Actualización
     Route::put("/{id}", [TipoVehiculoController::class, "Update"]);
 });
+
 
 

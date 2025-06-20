@@ -4,7 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VehiculoController;
 
-Route::prefix("vehiculo")->group(function () {
+Route::prefix("vehiculo")->middleware('jwt.cookie')->group(function () {
 
     Route::post("/", [VehiculoController::class, "save"]);
     Route::post("/addrange", [VehiculoController::class, "AddRange"]);
