@@ -96,18 +96,24 @@ const Register = () => {
 
     try {
       setIsLoading(true);
-      const res = await Axios.post("http://localhost:8020/api/user/register", {
-        name,
-        email,
-        password,
-        password_confirmation: confirmPassword,
-        id_cargo: idCargo,
-      });
+      const res = await Axios.post(
+        "http://localhost:8020/api/user/register",
+        {
+          name,
+          email,
+          password,
+          password_confirmation: confirmPassword,
+          id_cargo: idCargo,
+        },
+        { withCredentials: true }
+      );
 
-      const token = res.data.token;
-      localStorage.setItem("token", token);
-      toast.success("Registro exitoso. Bienvenido!", { theme: "dark" });
-      navigate("/home");
+      //const token = res.data.token;
+      //localStorage.setItem("token", token);
+      toast.success("Registro exitoso. Ahora puedes iniciar sesión", {
+        theme: "dark",
+      });
+      navigate("/");
     } catch (error) {
       console.error("Error al registrar:", error);
       toast.error("Error al registrar. Intenta de nuevo.", { theme: "dark" });

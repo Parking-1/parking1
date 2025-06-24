@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VehiculoController;
 
-Route::prefix("vehiculo")->middleware('jwt.cookie')->group(function () {
+Route::prefix("vehiculo")->middleware('jwt.verify')->group(function () {
 
     // Crear vehículos
     Route::post("/", [VehiculoController::class, "save"]);

@@ -12,7 +12,7 @@ Route::prefix("user")->group(function () {
     Route::post('/verifyEmail', [UserController::class, "GetIfExistsEmail"]);
 
      // 🔒 Rutas protegidas
-    Route::middleware('jwt.cookie')->group(function () {
+    Route::middleware('jwt.flex')->group(function () {
         Route::get('/me', [UserController::class, 'getAuthenticatedUser']);
     });
 });

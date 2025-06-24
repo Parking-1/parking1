@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   RiMailLine,
@@ -17,12 +17,12 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   // 👉 Redirigir si ya hay un token guardado
-  useEffect(() => {
+  /*useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
       navigate("/home");
     }
-  }, []);
+  }, []);*/
 
   const handleShowPassword = () => setShowPassword(!showPassword);
 
@@ -43,10 +43,10 @@ const Login = () => {
       );
 
       // Guardar token si lo recibes
-      const token = response.data?.token;
+      /*const token = response.data?.token;
       if (token) {
         localStorage.setItem("token", token);
-      }
+      }*/
 
       toast.success("Inicio de sesión exitoso", { theme: "dark" });
       navigate("/home");

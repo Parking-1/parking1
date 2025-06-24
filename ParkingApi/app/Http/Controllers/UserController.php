@@ -18,7 +18,7 @@ class UserController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('jwt.cookie')->except([
+        $this->middleware('jwt.verify')->except([
             'register',
             'authenticate',
             'GetIfExistsEmail'
