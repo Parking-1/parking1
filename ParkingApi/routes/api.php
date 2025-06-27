@@ -2,6 +2,10 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VehiculoController;
+use App\Http\Controllers\TipoVehiculoController;
+use App\Http\Controllers\TarifaController;
+
+//use App\Http\Controllers\CargoController;
 
 Route::prefix("vehiculo")->middleware('jwt.verify')->group(function () {
 
@@ -26,4 +30,11 @@ Route::prefix("vehiculo")->middleware('jwt.verify')->group(function () {
     Route::put("/{id}", [VehiculoController::class, "Update"]);
 });
 
+Route::get('/tipos-vehiculo', [TipoVehiculoController::class, 'GetAll']);
+Route::get('/tarifa-all', [TarifaController::class, 'GetAll']);
+
+Route::post('/tarifa-all', [TarifaController::class, 'store']);
+
+
+//Route::get('/cargo', [CargoController::class, 'index']);
 

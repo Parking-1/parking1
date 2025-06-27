@@ -20,7 +20,17 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TarifaController extends Controller
 {
-    public function Save(Request $request): JsonResponse
+    public function GetAll(): JsonResponse
+{
+    try {
+        $tarifas = Tarifa::all();
+        return response()->json(["data" => $tarifas], 200);
+    } catch (Exception $e) {
+        return response()->json(["error" => $e->getMessage()], 500);
+    }
+}
+
+    public function store(Request $request): JsonResponse
     {
         try {
             $tarifa = Tarifa::create($request->all());

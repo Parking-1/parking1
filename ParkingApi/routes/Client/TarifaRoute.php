@@ -20,5 +20,9 @@ Route::prefix("tarifa")->middleware('jwt.cookie')->group(function () {
     Route::put("/{id}", [TarifaController::class, "Update"]);
 });
 
+// ✅ Ruta pública para usar en el frontend sin autenticación
+Route::get('/tarifa-all', [TarifaController::class, 'GetAll']);
+
+
 
 

@@ -4,8 +4,9 @@ import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
 const Tarifas = () => {
-  const url = "http://localhost:8080/api/tarifa";
+  const url = "http://localhost:8000/api/tarifa-all";
   const [tarifas, setTarifas] = useState([]);
+  const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
@@ -16,6 +17,11 @@ const Tarifas = () => {
     precioLavado: "",
   });
 
+  useEffect(() => {
+    fetchTarifas();
+    fetchTiposVehiculo();
+  }, []);
+
   const fetchTarifas = async () => {
     try {
       const response = await axios.get(url);
@@ -25,9 +31,16 @@ const Tarifas = () => {
     }
   };
 
-  useEffect(() => {
-    fetchTarifas();
-  }, []);
+  const fetchTiposVehiculo = async () => {
+    try {
+      const response = await axios.get(
+        "http://localhost:8000/api/tipos-vehiculo"
+      );
+      setTiposVehiculo(response.data.data || []);
+    } catch (error) {
+      console.error("Error al obtener tipos de vehículo", error);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,9 +52,10 @@ const Tarifas = () => {
     const { claseVehiculo, precioHora, precioDia, precioLavado } = formValues;
 
     if (
-      [precioHora, precioDia, precioLavado].some((v) => isNaN(v) || v === "")
+      [precioHora, precioDia, precioLavado].some((v) => isNaN(v) || v === "") ||
+      claseVehiculo === ""
     ) {
-      alert("Todos los precios deben ser números válidos.");
+      alert("Completa todos los campos correctamente.");
       return;
     }
 
@@ -67,8 +81,9 @@ const Tarifas = () => {
           precio_dia: precioDia,
           precio_lavado: precioLavado,
         });
-        setTarifas([...tarifas, response.data.data]);
+        await fetchTarifas(); // ⚠️ Asegúrate de volver a traer la lista completa desde el backend
       }
+
       setFormValues({
         claseVehiculo: "",
         precioHora: "",
@@ -78,6 +93,7 @@ const Tarifas = () => {
     } catch (error) {
       console.error("Error al guardar la tarifa", error);
     }
+
     setLoading(false);
   };
 
@@ -108,14 +124,20 @@ const Tarifas = () => {
         <div className="flex flex-col justify-center items-center mx-auto my-12 w-full">
           <div className="flex flex-col md:flex-row w-full max-w-6xl p-6 gap-8">
             <form onSubmit={handleSubmit} className="w-full md:w-1/3 space-y-4">
-              <input
-                type="text"
+              <select
                 name="claseVehiculo"
-                placeholder="Clase de Vehículo"
-                className="w-full py-2 px-4 border rounded"
                 value={formValues.claseVehiculo}
                 onChange={handleChange}
-              />
+                className="w-full py-2 px-4 border rounded"
+              >
+                <option value="">Seleccione tipo de vehículo</option>
+                {tiposVehiculo.map((tipo) => (
+                  <option key={tipo.id} value={tipo.id}>
+                    {tipo.descripcion}
+                  </option>
+                ))}
+              </select>
+
               <input
                 type="text"
                 name="precioHora"
@@ -165,28 +187,35 @@ const Tarifas = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {tarifas.map((tarifa) => (
-                    <tr key={tarifa.id} className="text-center">
-                      <td className="p-2">{tarifa.id_tipo_vehiculo}</td>
-                      <td className="p-2">{tarifa.precio_base}</td>
-                      <td className="p-2">{tarifa.precio_dia}</td>
-                      <td className="p-2">{tarifa.precio_lavado}</td>
-                      <td className="p-2 flex justify-center gap-2">
-                        <button
-                          className="bg-blue-500 text-white px-3 py-1 rounded"
-                          onClick={() => handleEdit(tarifa)}
-                        >
-                          Editar
-                        </button>
-                        <button
-                          className="bg-red-500 text-white px-3 py-1 rounded"
-                          onClick={() => handleDelete(tarifa.id)}
-                        >
-                          Eliminar
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {tarifas.map((tarifa) => {
+                    const tipo = tiposVehiculo.find(
+                      (tv) => tv.id === tarifa.id_tipo_vehiculo
+                    );
+                    return (
+                      <tr key={tarifa.id} className="text-center">
+                        <td className="p-2">
+                          {tipo ? tipo.descripcion : tarifa.id_tipo_vehiculo}
+                        </td>
+                        <td className="p-2">{tarifa.precio_base}</td>
+                        <td className="p-2">{tarifa.precio_dia}</td>
+                        <td className="p-2">{tarifa.precio_lavado}</td>
+                        <td className="p-2 flex justify-center gap-2">
+                          <button
+                            className="bg-blue-500 text-white px-3 py-1 rounded"
+                            onClick={() => handleEdit(tarifa)}
+                          >
+                            Editar
+                          </button>
+                          <button
+                            className="bg-red-500 text-white px-3 py-1 rounded"
+                            onClick={() => handleDelete(tarifa.id)}
+                          >
+                            Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                   {tarifas.length === 0 && (
                     <tr>
                       <td

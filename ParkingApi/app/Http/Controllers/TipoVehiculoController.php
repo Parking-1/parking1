@@ -20,6 +20,17 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class TipoVehiculoController extends Controller
 {
+public function GetAll(): JsonResponse
+{
+    try {
+        $tipos = \App\Models\TipoVehiculo::all(); // Asegúrate de importar el modelo si no está arriba
+        return response()->json(["data" => $tipos], 200);
+    } catch (Exception $e) {
+        return response()->json(["error" => $e->getMessage()], 500);
+    }
+}
+
+
     public function Save(Request $request): JsonResponse
     {
         try {
