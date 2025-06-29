@@ -7,7 +7,7 @@ use App\Http\Controllers\TarifaController;
 
 //use App\Http\Controllers\CargoController;
 
-Route::prefix("vehiculo")->middleware('jwt.verify')->group(function () {
+Route::prefix("vehiculo")->middleware('jwt.cookie')->group(function () {
 
     // Crear vehículos
     Route::post("/", [VehiculoController::class, "save"]);
@@ -33,7 +33,14 @@ Route::prefix("vehiculo")->middleware('jwt.verify')->group(function () {
 Route::get('/tipos-vehiculo', [TipoVehiculoController::class, 'GetAll']);
 Route::get('/tarifa-all', [TarifaController::class, 'GetAll']);
 
-Route::post('/tarifa-all', [TarifaController::class, 'store']);
+
+Route::middleware(['jwt.cookie', 'is.admin'])->group(function () {
+    //Route::post('/tarifa-all', [TarifaController::class, 'store']);
+    Route::post('/tarifa-all', [TarifaController::class, 'Save']);
+    Route::put('/tarifa-all/{id}', [TarifaController::class, 'Update']);
+    Route::delete('/tarifa-all/{id}', [TarifaController::class, 'Delete']);
+});
+
 
 
 //Route::get('/cargo', [CargoController::class, 'index']);

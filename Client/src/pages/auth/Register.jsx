@@ -8,8 +8,9 @@ import {
   RiUser2Line,
   RiAdminLine,
 } from "react-icons/ri";
-import Axios from "axios";
+//import Axios from "axios";
 import { toast } from "react-toastify";
+import axios from "../../config/axios-instance.jsx";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -65,10 +66,7 @@ const Register = () => {
   const checkEmailExists = async () => {
     if (!email) return;
     try {
-      const res = await Axios.post(
-        "http://localhost:8020/api/user/email-exists",
-        { email }
-      );
+      const res = await axios.post("/user/email-exists", { email });
       setEmailExists(res.data.exists);
     } catch (error) {
       console.error("Error verificando email:", error);
@@ -96,8 +94,8 @@ const Register = () => {
 
     try {
       setIsLoading(true);
-      const res = await Axios.post(
-        "http://localhost:8020/api/user/register",
+      const res = await axios.post(
+        "user/register",
         {
           name,
           email,

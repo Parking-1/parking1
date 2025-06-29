@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Axios from "axios";
+import axios from "../config/axios-instance"; // Asegúrate de importar el correcto
 import { toast } from "react-toastify";
 
 const useAuth = () => {
@@ -11,9 +11,7 @@ const useAuth = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const response = await Axios.get("http://localhost:8000/api/user/me", {
-          withCredentials: true, // Enviar cookies automáticamente
-        });
+        const response = await axios.get("/user/me");
         setUser(response.data.user);
       } catch (error) {
         console.error("Error al obtener el usuario:", error);
@@ -28,9 +26,7 @@ const useAuth = () => {
 
   const logout = async () => {
     try {
-      await Axios.post("http://localhost:8000/api/user/logout", null, {
-        withCredentials: true,
-      });
+      await axios.post("/user/logout");
       toast.success("Sesión cerrada correctamente", { theme: "dark" });
     } catch (e) {
       console.error("Error cerrando sesión:", e);

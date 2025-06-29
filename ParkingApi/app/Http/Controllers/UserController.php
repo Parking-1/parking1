@@ -42,22 +42,31 @@ class UserController extends Controller
         }
     }
 
-    public function getAuthenticatedUser(): JsonResponse
-    {
-        try {
-            $user = JWTAuth::parseToken()->authenticate();
-            if (!$user) {
-                return response()->json(['error' => 'Usuario no encontrado'], 404);
-            }
-            return response()->json(compact('user'), 200);
-        } catch (TokenExpiredException $e) {
-            return response()->json(['error' => 'Token expirado'], $e->getStatusCode());
-        } catch (TokenInvalidException $e) {
-            return response()->json(['error' => 'Token inválido'], $e->getStatusCode());
-        } catch (JWTException $e) {
-            return response()->json(['error' => 'Token ausente'], $e->getStatusCode());
-        }
+   public function getAuthenticatedUser(Request $request): JsonResponse
+{
+    $token = $request->cookie('token');
+
+    if (!$token) {
+        return response()->json(['error' => 'Token no encontrado'], 401);
     }
+
+    try {
+        $user = JWTAuth::setToken($token)->authenticate();
+
+        if (!$user) {
+            return response()->json(['error' => 'Usuario no encontrado'], 404);
+        }
+
+        return response()->json(['user' => $user], 200);
+    } catch (TokenExpiredException $e) {
+        return response()->json(['error' => 'Token expirado'], $e->getStatusCode());
+    } catch (TokenInvalidException $e) {
+        return response()->json(['error' => 'Token inválido'], $e->getStatusCode());
+    } catch (JWTException $e) {
+        return response()->json(['error' => 'Token ausente o inválido'], $e->getStatusCode());
+    }
+}
+
 
     public function logOut(): JsonResponse
     {
@@ -76,39 +85,42 @@ class UserController extends Controller
     }
 
     public function register(Request $request): JsonResponse
-    {
-        $validator = Validator::make($request->all(), [
-            'name'     => 'required|string|max:255',
-            'email'    => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'id_cargo' => 'required|integer'
+{
+    $validator = Validator::make($request->all(), [
+        'name'     => 'required|string|max:255',
+        'email'    => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:6|confirmed',
+        'id_cargo' => 'required|integer',
+        'rol'      => 'required|string|in:empleado,administrador' // Asegura que sea un rol permitido
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json($validator->errors(), 422);
+    }
+
+    try {
+        $rolNombre = $request->get('rol'); // Puede ser 'empleado' o 'administrador'
+        $rol = Rol::where('nombre', $rolNombre)->firstOrFail();
+
+        $user = User::create([
+            'name'     => $request->get('name'),
+            'email'    => $request->get('email'),
+            'password' => Hash::make($request->get('password')),
+            'id_cargo' => $request->get('id_cargo')
         ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
-        }
+        $user->rol()->sync([$rol->id]);
 
-        try {
-            $rol = Rol::where('nombre', 'empleado')->firstOrFail();
+        $token = JWTAuth::fromUser($user);
 
-            $user = User::create([
-                'name'     => $request->get('name'),
-                'email'    => $request->get('email'),
-                'password' => Hash::make($request->get('password')),
-                'id_cargo' => $request->get('id_cargo')
-            ]);
-
-            $user->rol()->sync([$rol->id]);
-
-            $token = JWTAuth::fromUser($user);
-
-            return response()->json(compact('user', 'token'), 201);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => 'Rol no encontrado'], 404);
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Error al registrar el usuario', 'message' => $e->getMessage()], 500);
-        }
+        return response()->json(compact('user', 'token'), 201);
+    } catch (ModelNotFoundException $e) {
+        return response()->json(['error' => 'Rol no encontrado'], 404);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Error al registrar el usuario', 'message' => $e->getMessage()], 500);
     }
+}
+
 
     public function GetIfExistsEmail(Request $request): JsonResponse
     {

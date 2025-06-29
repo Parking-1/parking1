@@ -11,13 +11,19 @@ class JwtCookieMiddleware
     public function handle($request, Closure $next)
     {
         $token = $request->cookie('token');
-        // Verificar si el token está presente
+
         if (!$token) {
             return response()->json(['error' => 'Token no encontrado'], 401);
         }
 
         try {
-            JWTAuth::setToken($token)->authenticate();
+            $user = JWTAuth::setToken($token)->authenticate();
+
+            if (!$user) {
+                return response()->json(['error' => 'Usuario no encontrado'], 401);
+            }
+
+            auth()->setUser($user); // <- Esto es clave
         } catch (Exception $e) {
             return response()->json(['error' => 'Token inválido o expirado'], 401);
         }
@@ -25,4 +31,5 @@ class JwtCookieMiddleware
         return $next($request);
     }
 }
+
 

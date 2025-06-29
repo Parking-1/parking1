@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
+import axios from "../config/axios-instance.jsx";
+
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
 const Tarifas = () => {
-  const url = "http://localhost:8000/api/tarifa-all";
+  const url = "http://parking.local:8080/api/tarifa-all";
   const [tarifas, setTarifas] = useState([]);
   const [tiposVehiculo, setTiposVehiculo] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -34,7 +35,7 @@ const Tarifas = () => {
   const fetchTiposVehiculo = async () => {
     try {
       const response = await axios.get(
-        "http://localhost:8000/api/tipos-vehiculo"
+        "http://localhost:8080/api/tipos-vehiculo"
       );
       setTiposVehiculo(response.data.data || []);
     } catch (error) {

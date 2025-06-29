@@ -51,10 +51,9 @@ class User extends Authenticatable implements JWTSubject
     public function rol() : BelongsToMany{
         return $this->belongsToMany(Rol::class, "user_rol", "id_user", "id_rol");
     }
-    public function isGranted($rol, User $user)
+    public function isGranted($rol)
     {
-        $roles = $user->rol->pluck("nombre")->toArray();
-        return in_array( $rol  , $roles);
+    return $this->rol()->where('nombre', $rol)->exists();
     }
     // jwt
 

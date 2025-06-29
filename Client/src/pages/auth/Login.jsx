@@ -6,7 +6,8 @@ import {
   RiEyeLine,
   RiEyeOffLine,
 } from "react-icons/ri";
-import Axios from "axios";
+import axios from "../../config/axios-instance.jsx";
+
 import { toast } from "react-toastify";
 
 const Login = () => {
@@ -36,8 +37,8 @@ const Login = () => {
 
     setIsLoading(true);
     try {
-      const response = await Axios.post(
-        "http://localhost:8000/api/user/login",
+      const response = await axios.post(
+        "/user/login",
         { email, password },
         { withCredentials: true } // Para cookies
       );
