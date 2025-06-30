@@ -16,13 +16,14 @@ class IsAdminMiddleware
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function handle(Request $request, Closure $next): Response
-    {
-        $user = auth()->user();
+{
+    $user = auth()->user();
 
-        if (!$user || !$user->isGranted('administrador')) {
-            return response()->json(['error' => 'Acceso no autorizado. Solo administradores.'], 403);
-        }
-
-        return $next($request);
+    if (!$user || $user->rol !== 'administrador') {
+        return response()->json(['error' => 'Acceso no autorizado. Solo administradores.'], 403);
     }
+
+    return $next($request);
+}
+
 }

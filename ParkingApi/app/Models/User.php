@@ -14,55 +14,42 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
+
     const EMPLEADO_ROL = 'empleado';
     const ADMINISTRADOR_ROL = 'administrador';
 
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'rol', // Rol directamente como string
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
 
-    public function rol() : BelongsToMany{
-        return $this->belongsToMany(Rol::class, "user_rol", "id_user", "id_rol");
-    }
     public function isGranted($rol)
     {
-    return $this->rol()->where('nombre', $rol)->exists();
+        return $this->rol === $rol;
     }
-    // jwt
 
+    // JWT
     public function getJWTIdentifier()
     {
         return $this->getKey();
     }
+
     public function getJWTCustomClaims()
     {
-        return [];
+        return [
+            'rol' => $this->rol, // opcional
+        ];
     }
 }
+

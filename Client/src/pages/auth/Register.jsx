@@ -25,6 +25,7 @@ const Register = () => {
   const [passwordStrength, setPasswordStrength] = useState("");
   const [passwordMatch, setPasswordMatch] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [rol, setRol] = useState("empleado");
 
   const handleShowPassword = () => setShowPassword(!showPassword);
 
@@ -102,6 +103,7 @@ const Register = () => {
           password,
           password_confirmation: confirmPassword,
           id_cargo: idCargo,
+          rol,
         },
         { withCredentials: true }
       );
@@ -171,13 +173,16 @@ const Register = () => {
           )}
           <SelectWithIcon
             icon={RiAdminLine}
-            value={idCargo}
-            onChange={(e) => setIdCargo(parseInt(e.target.value))}
+            value={rol}
+            onChange={(e) => setRol(e.target.value)}
             options={[
-              { value: 1, label: "Empleado" },
-              { value: 2, label: "Administrador" },
+              { value: "empleado", label: "Empleado" },
+              { value: "administrador", label: "Administrador" },
             ]}
           />
+          <p className="text-sm text-gray-600 text-center">
+            Rol seleccionado: <strong>{rol}</strong>
+          </p>
           <button
             type="submit"
             disabled={!isFormValid() || isLoading}

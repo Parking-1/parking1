@@ -30,14 +30,16 @@ class TarifaController extends Controller
     }
 }
 
-    public function store(Request $request): JsonResponse
+    public function Save(Request $request): JsonResponse
     {
         try {
             $tarifa = Tarifa::create($request->all());
             return response()->json(["data" => $tarifa], 201);
         } catch (QueryException $e) {
+            Log::error('Error de consulta al guardar tarifa: ' . $e->getMessage());
             return response()->json(["error" => "Error al crear la tarifa"], 500);
         } catch (Exception $e) {
+            Log::error('Error general al guardar tarifa: ' . $e->getMessage());
             return response()->json(["error" => $e->getMessage()], 500);
         }
     }
@@ -88,18 +90,19 @@ class TarifaController extends Controller
     }
 
     public function Delete($id): JsonResponse
-    {
-        try {
-            Tarifa::findOrFail($id)->delete();
-            return response()->noContent();
-        } catch (ModelNotFoundException $e) {
-            return response()->json(["error" => "Tarifa no encontrada"], 404);
-        } catch (QueryException $e) {
-            return response()->json(["error" => "Error al eliminar Tarifa"], 500);
-        } catch (Exception $e) {
-            return response()->json(["error" => "Error desconocido"], 500);
-        }
+{
+    try {
+        Tarifa::findOrFail($id)->delete();
+        return response()->json(['message' => 'Tarifa eliminada'], 200); // ✅
+    } catch (ModelNotFoundException $e) {
+        return response()->json(["error" => "Tarifa no encontrada"], 404);
+    } catch (QueryException $e) {
+        return response()->json(["error" => "Error al eliminar Tarifa"], 500);
+    } catch (Exception $e) {
+        return response()->json(["error" => "Error desconocido"], 500);
     }
+}
+
 
     public function DeleteRange(Request $request): JsonResponse
     {

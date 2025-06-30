@@ -84,14 +84,14 @@ class UserController extends Controller
         }
     }
 
-    public function register(Request $request): JsonResponse
+ public function register(Request $request): JsonResponse
 {
     $validator = Validator::make($request->all(), [
         'name'     => 'required|string|max:255',
         'email'    => 'required|string|email|max:255|unique:users',
         'password' => 'required|string|min:6|confirmed',
         'id_cargo' => 'required|integer',
-        'rol'      => 'required|string|in:empleado,administrador' // Asegura que sea un rol permitido
+        'rol'      => 'required|string|in:empleado,administrador'
     ]);
 
     if ($validator->fails()) {
@@ -99,27 +99,25 @@ class UserController extends Controller
     }
 
     try {
-        $rolNombre = $request->get('rol'); // Puede ser 'empleado' o 'administrador'
-        $rol = Rol::where('nombre', $rolNombre)->firstOrFail();
-
         $user = User::create([
             'name'     => $request->get('name'),
             'email'    => $request->get('email'),
-            'password' => Hash::make($request->get('password')),
-            'id_cargo' => $request->get('id_cargo')
+            'password' => \Hash::make($request->get('password')),
+            'id_cargo' => $request->get('id_cargo'),
+            'rol'      => $request->get('rol'), // ✅ ahora directamente
         ]);
 
-        $user->rol()->sync([$rol->id]);
-
-        $token = JWTAuth::fromUser($user);
+        $token = \JWTAuth::fromUser($user);
 
         return response()->json(compact('user', 'token'), 201);
-    } catch (ModelNotFoundException $e) {
-        return response()->json(['error' => 'Rol no encontrado'], 404);
-    } catch (Exception $e) {
-        return response()->json(['error' => 'Error al registrar el usuario', 'message' => $e->getMessage()], 500);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Error al registrar el usuario',
+            'message' => $e->getMessage(),
+        ], 500);
     }
 }
+
 
 
     public function GetIfExistsEmail(Request $request): JsonResponse
