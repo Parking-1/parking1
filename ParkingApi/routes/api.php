@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\TipoVehiculoController;
 use App\Http\Controllers\TarifaController;
+use App\Http\Controllers\TransaccionController;
 
 //use App\Http\Controllers\CargoController;
 
@@ -40,6 +41,26 @@ Route::middleware(['jwt.cookie', 'is.admin'])->group(function () {
     Route::put('/tarifa-all/{id}', [TarifaController::class, 'Update']);
     Route::delete('/tarifa-all/{id}', [TarifaController::class, 'Delete']);
 });
+
+Route::prefix("transaccion")->middleware('jwt.cookie')->group(function () {
+
+    // Registrar entrada
+    Route::post("/", [TransaccionController::class, "Save"]);
+
+    // Cerrar transacción (salida)
+    Route::put("/{id}/cerrar", [TransaccionController::class, "CerrarTransaccion"]);
+
+    // Consultar
+    Route::get("/", [TransaccionController::class, "GetPaginate"]);
+    Route::get("/{id}", [TransaccionController::class, "GetById"]);
+    Route::get("/between/fechas", [TransaccionController::class, "GetBetween"]);
+
+    // Actualizar o eliminar
+    Route::put("/{id}", [TransaccionController::class, "Update"]);
+    Route::delete("/{id}", [TransaccionController::class, "Delete"]);
+    Route::delete("/", [TransaccionController::class, "DeleteRange"]);
+});
+
 
 
 

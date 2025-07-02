@@ -4,16 +4,21 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Vehiculo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Espacio extends Model
 {
     use HasFactory;
+
     protected $table = "espacio";
-    protected $fillable = ["descripcion"];
+
+    protected $fillable = ["descripcion", "estado"]; // Asegúrate de incluir `estado` si lo usas
+
     protected $hidden = ["created_at", "updated_at"];
-    public function vehiculo () : BelongsToMany{
-        return $this->belongsToMany(Vehiculo::class);
+
+    public function transacciones(): HasMany
+    {
+        return $this->hasMany(Transaccion::class, 'id_espacio');
     }
 }
+

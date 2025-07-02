@@ -28,7 +28,7 @@ class TransaccionController extends Controller
                 throw new Exception("No hay espacios disponibles.");
             }
 
-            $tarifa = $vehiculo->TipoVehiculo->Tarifa->first(); // asume relación hasMany
+            $tarifa = $vehiculo->TipoVehiculo->Tarifa->first();
             if (!$tarifa) {
                 throw new Exception("No hay tarifa definida para el tipo de vehículo.");
             }
@@ -38,10 +38,11 @@ class TransaccionController extends Controller
             $espacio->update(['estado' => 'ocupado']);
 
             $transaccion = Transaccion::create([
-                'id_vehiculo' => $vehiculo->id,
-                'id_tarifa'   => $tarifa->id,
-                'id_espacio'  => $espacio->id,
-                'fecha_entrada' => now()
+                'id_vehiculo'   => $vehiculo->id,
+                'id_tarifa'     => $tarifa->id,
+                'id_espacio'    => $espacio->id,
+                'fecha_entrada' => now(),
+                'lavado'        => $request->lavado ?? false,
             ]);
 
             DB::commit();
@@ -62,8 +63,8 @@ class TransaccionController extends Controller
     {
         try {
             $data = Transaccion::with(['Vehiculo.TipoVehiculo', 'Tarifa', 'Espacio'])
-                        ->orderBy('created_at', 'desc')
-                        ->paginate(15);
+                ->orderBy('created_at', 'desc')
+                ->paginate(15);
 
             return response()->json(["data" => $data], 200);
         } catch (QueryException $e) {
@@ -120,14 +121,16 @@ class TransaccionController extends Controller
             $transaccion = Transaccion::findOrFail($id);
             $this->authorize('update', $transaccion);
 
-            DB::transaction(function () use ($transaccion, $request) {
-                $transaccion->update($request->all());
-            });
+            DB::beginTransaction();
+            $transaccion->update($request->all());
+            DB::commit();
 
             return response()->json(["message" => "Transacción actualizada correctamente"], 200);
         } catch (ModelNotFoundException $e) {
+            DB::rollBack();
             return response()->json(["error" => "Transacción no encontrada"], 404);
         } catch (Exception $e) {
+            DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
         }
     }
@@ -144,22 +147,7 @@ class TransaccionController extends Controller
                 $transaccion->fecha_salida = $salida;
 
                 $tarifa = $transaccion->Tarifa;
-                $monto = 0;
-
-                switch ($tarifa->tipo_tarifa) {
-                    case 'hora':
-                        $horas = $entrada->diffInHours($salida);
-                        $monto = $horas * $tarifa->precio_base;
-                        break;
-                    case 'dia':
-                        $dias = $entrada->diffInDays($salida);
-                        $monto = $dias * $tarifa->precio_base;
-                        break;
-                    case 'mes':
-                        $meses = $entrada->diffInMonths($salida);
-                        $monto = $meses * $tarifa->precio_base;
-                        break;
-                }
+                $monto = $this->calcularPrecio($entrada, $salida, $tarifa);
 
                 $transaccion->precio_total = $monto;
                 $transaccion->save();
@@ -190,5 +178,24 @@ class TransaccionController extends Controller
             return response()->json(["error" => $e->getMessage()], 500);
         }
     }
-}
 
+    /**
+     * Método auxiliar para calcular el precio de una transacción
+     */
+    private function calcularPrecio(Carbon $entrada, Carbon $salida, $tarifa): float
+    {
+        switch ($tarifa->tipo_tarifa) {
+            case 'hora':
+                $horas = $entrada->diffInHours($salida);
+                return $horas * $tarifa->precio_base;
+            case 'dia':
+                $dias = $entrada->diffInDays($salida);
+                return $dias * $tarifa->precio_base;
+            case 'mes':
+                $meses = $entrada->diffInMonths($salida);
+                return $meses * $tarifa->precio_base;
+            default:
+                return 0;
+        }
+    }
+}
