@@ -20,7 +20,7 @@ class ClienteFactory extends Factory
         return [
             "nombre" => fake()->name(),
             "apellido" => fake()->name(),
-            "cedula" => (string)(fake()->unique()->numberBetween(100, 200)),
+            "cedula" => (string)(fake()->unique()->numberBetween(10000000, 99999999)),
             "telefono" => fake()->numberBetween(10000, 20000),
         ];
     }

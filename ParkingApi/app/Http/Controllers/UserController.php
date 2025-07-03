@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
@@ -99,18 +100,30 @@ class UserController extends Controller
     }
 
     try {
+        DB::beginTransaction();
         $user = User::create([
             'name'     => $request->get('name'),
             'email'    => $request->get('email'),
             'password' => \Hash::make($request->get('password')),
             'id_cargo' => $request->get('id_cargo'),
-            'rol'      => $request->get('rol'), // ✅ ahora directamente
-        ]);
+       ]);
+
+       // 2. Buscar el rol por nombre
+        $rol = Rol::where('nombre', $request->rol)->firstOrFail();
+
+        // 3. Asignar el rol al usuario (muchos a muchos)
+        $user->roles()->attach($rol->id);
+
+        DB::commit();
 
         $token = \JWTAuth::fromUser($user);
 
         return response()->json(compact('user', 'token'), 201);
-    } catch (\Exception $e) {
+    } catch (ModelNotFoundException $e) {
+        DB::rollBack();
+        return response()->json(['error' => 'Rol no válido o no encontrado'], 404);
+    } catch (Exception $e) {
+        DB::rollBack();
         return response()->json([
             'error' => 'Error al registrar el usuario',
             'message' => $e->getMessage(),
