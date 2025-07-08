@@ -38,7 +38,7 @@ const Login = () => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "/user/login",
+        "/user/authenticate",
         { email, password },
         { withCredentials: true } // Para cookies
       );

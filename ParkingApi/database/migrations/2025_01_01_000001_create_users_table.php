@@ -19,8 +19,11 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+
+            // FK a cargo
             $table->unsignedBigInteger("id_cargo")->default(1);
-            $table->foreign('id_cargo')->references('id')->on('cargo');
+            $table->foreign('id_cargo')->references('id')->on('cargo')->onDelete('restrict');
+
             $table->rememberToken();
             $table->timestamps();
         });

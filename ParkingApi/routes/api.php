@@ -5,6 +5,7 @@ use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\TipoVehiculoController;
 use App\Http\Controllers\TarifaController;
 use App\Http\Controllers\TransaccionController;
+use App\Http\Controllers\UserController;
 
 //use App\Http\Controllers\CargoController;
 
@@ -29,10 +30,16 @@ Route::prefix("vehiculo")->middleware('jwt.cookie')->group(function () {
 
     // Actualización
     Route::put("/{id}", [VehiculoController::class, "Update"]);
+
+    Route::get('/vehiculo/by-placa', [VehiculoController::class, 'GetByPlaca'])->middleware('jwt.cookie');
+
+    Route::get('/transaccion/placa/{placa}', [TransaccionController::class, 'getByPlaca']);
+
 });
 
 Route::get('/tipos-vehiculo', [TipoVehiculoController::class, 'GetAll']);
 Route::get('/tarifa-all', [TarifaController::class, 'GetAll']);
+
 
 
 Route::middleware(['jwt.cookie', 'is.admin'])->group(function () {
@@ -61,6 +68,9 @@ Route::prefix("transaccion")->middleware('jwt.cookie')->group(function () {
     Route::delete("/", [TransaccionController::class, "DeleteRange"]);
 });
 
+Route::post('/user/authenticate', [UserController::class, 'authenticate']);
+// Registro de usuarios
+Route::post('/user/register', [UserController::class, 'register']);
 
 
 

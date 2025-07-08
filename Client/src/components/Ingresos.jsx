@@ -1,7 +1,9 @@
 import { useState } from "react";
-import axios from "axios";
+import axios from "../config/axios-instance.jsx";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Ingresos = () => {
   const [placa, setPlaca] = useState("");
@@ -10,28 +12,85 @@ const Ingresos = () => {
   const [fecha, setFecha] = useState("");
   const [lavado, setLavado] = useState(false);
 
+  const tipoToId = (tipo) => {
+    switch (tipo) {
+      case "auto":
+        return 1;
+      case "moto":
+        return 2;
+      case "camion":
+        return 3;
+      case "bus":
+        return 4;
+      default:
+        return 1;
+    }
+  };
+
+  const crearVehiculo = async () => {
+    try {
+      const res = await axios.post(
+        "/vehiculo",
+        {
+          placa,
+          id_tipo_vehiculo: tipoToId(tipo),
+          //id_cliente: null,
+        },
+        { withCredentials: true }
+      );
+      return res.data.data;
+    } catch (error) {
+      if (
+        error.response &&
+        error.response.data &&
+        error.response.data.error === "Validación fallida"
+      ) {
+        const detalles = error.response.data.details;
+        if (detalles && detalles.placa && detalles.placa.length > 0) {
+          toast.error(`❌ ${detalles.placa[0]}`);
+        } else {
+          toast.error("❌ Validación fallida.");
+        }
+      } else if (
+        error.response &&
+        error.response.data &&
+        error.response.data.error === "Token no encontrado"
+      ) {
+        toast.error(
+          "❌ Tu sesión ha expirado. Por favor, inicia sesión nuevamente."
+        );
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+      } else {
+        toast.error("❌ Error al crear el vehículo.");
+      }
+      return null;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!placa || !hora || !fecha || !tipo) {
-      alert("Todos los campos son obligatorios.");
+      toast.error("❗ Todos los campos son obligatorios.");
       return;
     }
 
+    const vehiculo = await crearVehiculo();
+    if (!vehiculo) return;
+
     try {
-      const response = await axios.post(
-        "/api/transaccion",
+      await axios.post(
+        "/transaccion",
         {
-          placa,
-          tipo_vehiculo: tipo,
-          hora,
-          fecha,
-          lavado: lavado ? 1 : 0,
+          id_vehiculo: vehiculo.id,
+          lavado,
         },
         { withCredentials: true }
       );
 
-      alert("Ingreso registrado correctamente");
+      toast.success("✅ Ingreso registrado correctamente.");
       setPlaca("");
       setTipo("auto");
       setHora("");
@@ -39,7 +98,7 @@ const Ingresos = () => {
       setLavado(false);
     } catch (error) {
       console.error("Error al registrar ingreso:", error);
-      alert("Ocurrió un error al registrar el ingreso.");
+      toast.error("❌ Ocurrió un error al registrar el ingreso.");
     }
   };
 
@@ -57,7 +116,6 @@ const Ingresos = () => {
               Registrar Ingreso de Vehículo
             </h1>
 
-            {/* Placa */}
             <label htmlFor="placa" className="block mb-2 font-medium">
               Ingrese placa o matrícula del vehículo
             </label>
@@ -72,7 +130,6 @@ const Ingresos = () => {
               required
             />
 
-            {/* Tipo de Vehículo */}
             <label htmlFor="tipo" className="block mb-2 font-medium">
               Seleccione clase de vehículo
             </label>
@@ -90,7 +147,6 @@ const Ingresos = () => {
               <option value="bus">Bus</option>
             </select>
 
-            {/* Hora y Fecha */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
               <div>
                 <label htmlFor="hora" className="block mb-2 font-medium">
@@ -122,7 +178,6 @@ const Ingresos = () => {
               </div>
             </div>
 
-            {/* Lavado */}
             <div className="flex items-center mb-4">
               <input
                 id="lavado"
@@ -137,7 +192,6 @@ const Ingresos = () => {
               </label>
             </div>
 
-            {/* Botones */}
             <div className="flex flex-col items-center gap-4">
               <button
                 type="submit"
@@ -162,6 +216,17 @@ const Ingresos = () => {
           </form>
         </div>
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
     </div>
   );
 };

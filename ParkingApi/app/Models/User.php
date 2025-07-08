@@ -14,6 +14,9 @@ class User extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    public const EMPLEADO_ROL = 'empleado';
+    public const ADMINISTRADOR_ROL = 'administrador';
+
     protected $fillable = [
         'name',
         'email',
@@ -54,6 +57,18 @@ class User extends Authenticatable implements JWTSubject
             // Puedes incluir roles si lo deseas
         ];
     }
+
+    // Dentro del modelo App\Models\User
+
+public function isGranted(string|array $roles): bool
+{
+    if (is_string($roles)) {
+        $roles = [$roles];
+    }
+
+    return $this->roles()->whereIn('nombre', $roles)->exists();
+}
+
 }
 
 

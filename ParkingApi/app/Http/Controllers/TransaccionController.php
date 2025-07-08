@@ -28,7 +28,7 @@ class TransaccionController extends Controller
                 throw new Exception("No hay espacios disponibles.");
             }
 
-            $tarifa = $vehiculo->TipoVehiculo->Tarifa->first();
+            $tarifa = $vehiculo->tipoVehiculo->tarifa->first();
             if (!$tarifa) {
                 throw new Exception("No hay tarifa definida para el tipo de vehículo.");
             }
@@ -52,7 +52,7 @@ class TransaccionController extends Controller
             return response()->json(["error" => "Vehículo no encontrado"], 404);
         } catch (QueryException $e) {
             DB::rollBack();
-            return response()->json(["error" => "Error de base de datos"], 500);
+            return response()->json(["error" => $e->getMessage()], 500);
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
@@ -78,6 +78,24 @@ class TransaccionController extends Controller
             $transaccion = Transaccion::with(['Vehiculo.TipoVehiculo', 'Tarifa', 'Espacio'])->findOrFail($id);
             $this->authorize('view', $transaccion);
             return response()->json(["data" => $transaccion], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(["error" => "Transacción no encontrada"], 404);
+        } catch (Exception $e) {
+            return response()->json(["error" => $e->getMessage()], 500);
+        }
+    }
+
+    public function GetByPlaca(Request $request): JsonResponse
+    {
+        try {
+            $placa = strtoupper($request->query('placa'));
+
+            $trans = Transaccion::with(['Vehiculo.TipoVehiculo', 'Tarifa', 'Espacio'])
+                ->whereHas('Vehiculo', fn ($q) => $q->where('placa', $placa))
+                ->whereNull('fecha_salida')
+                ->firstOrFail();
+
+            return response()->json(['data' => $trans], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(["error" => "Transacción no encontrada"], 404);
         } catch (Exception $e) {
@@ -135,33 +153,38 @@ class TransaccionController extends Controller
         }
     }
 
-    public function CerrarTransaccion($id): JsonResponse
-    {
-        try {
-            $transaccion = Transaccion::with(['Vehiculo.TipoVehiculo.Tarifa', 'Espacio'])->findOrFail($id);
-            $this->authorize('update', $transaccion);
+    public function CerrarTransaccion(Request $request, $id): JsonResponse
+{
+    try {
+        $transaccion = Transaccion::with(['Vehiculo.TipoVehiculo.Tarifa', 'Espacio'])->findOrFail($id);
+        $this->authorize('update', $transaccion);
 
-            DB::transaction(function () use ($transaccion) {
-                $entrada = Carbon::parse($transaccion->fecha_entrada);
-                $salida = now();
-                $transaccion->fecha_salida = $salida;
+        $lavado = filter_var($request->input('lavado', false), FILTER_VALIDATE_BOOLEAN);
 
-                $tarifa = $transaccion->Tarifa;
-                $monto = $this->calcularPrecio($entrada, $salida, $tarifa);
+        DB::transaction(function () use ($transaccion, $lavado) {
+            $entrada = Carbon::parse($transaccion->fecha_entrada);
+            $salida = now();
+            $tarifa = $transaccion->Tarifa;
 
-                $transaccion->precio_total = $monto;
-                $transaccion->save();
+            $monto = $this->calcularPrecio($entrada, $salida, $tarifa, $lavado);
 
-                $transaccion->Espacio->update(['estado' => 'disponible']);
-            });
+            $transaccion->update([
+                'fecha_salida' => $salida,
+                'precio_total' => $monto,
+                'lavado'       => $lavado,
+            ]);
 
-            return response()->json(["message" => "Transacción cerrada correctamente"], 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(["error" => "Transacción no encontrada"], 404);
-        } catch (Exception $e) {
-            return response()->json(["error" => $e->getMessage()], 500);
-        }
+            $transaccion->Espacio->update(['estado' => 'disponible']);
+        });
+
+        return response()->json(["message" => "Transacción cerrada correctamente"], 200);
+    } catch (ModelNotFoundException $e) {
+        return response()->json(["error" => "Transacción no encontrada"], 404);
+    } catch (Exception $e) {
+        return response()->json(["error" => $e->getMessage()], 500);
     }
+}
+
 
     public function GetBetween(Request $request): JsonResponse
     {
@@ -182,20 +205,29 @@ class TransaccionController extends Controller
     /**
      * Método auxiliar para calcular el precio de una transacción
      */
-    private function calcularPrecio(Carbon $entrada, Carbon $salida, $tarifa): float
+    private function calcularPrecio(Carbon $entrada, Carbon $salida, $tarifa, bool $lavado = false): float
     {
+        $monto = 0;
+
         switch ($tarifa->tipo_tarifa) {
             case 'hora':
-                $horas = $entrada->diffInHours($salida);
-                return $horas * $tarifa->precio_base;
+                $horas = max(1, $entrada->diffInHours($salida));
+                $monto = $horas * $tarifa->precio_base;
+                break;
             case 'dia':
-                $dias = $entrada->diffInDays($salida);
-                return $dias * $tarifa->precio_base;
+                $dias = max(1, $entrada->diffInDays($salida));
+                $monto = $dias * $tarifa->precio_base;
+                break;
             case 'mes':
-                $meses = $entrada->diffInMonths($salida);
-                return $meses * $tarifa->precio_base;
-            default:
-                return 0;
+                $meses = max(1, $entrada->diffInMonths($salida));
+                $monto = $meses * $tarifa->precio_base;
+                break;
         }
+
+        if ($lavado && isset($tarifa->precio_lavado)) {
+            $monto += $tarifa->precio_lavado;
+        }
+
+        return $monto;
     }
 }

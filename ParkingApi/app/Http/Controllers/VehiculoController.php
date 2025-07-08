@@ -12,21 +12,55 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\QueryException;
 use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Exception;
 
 class VehiculoController extends Controller
 {
     public function save(Request $request): JsonResponse
     {
-        try {
-            $vehiculo = Vehiculo::create($request->all());
-            return response()->json(["data" => $vehiculo], 201);
-        } catch (QueryException $e) {
-            return response()->json(["error" => "Error al crear el vehículo"], 500);
-        } catch (Exception $e) {
-            return response()->json(["error" => $e->getMessage()], 500);
-        }
+        $input = $request->all(); // ✅ Define $input aquí
+         $validator = Validator::make($input, [
+        'placa' => [
+            'required',
+            'string',
+            Rule::unique('vehiculo')->where(function ($query) use ($input) {
+                return $query->where('id_tipo_vehiculo', $input['id_tipo_vehiculo']);
+            }),
+        ],
+        'id_tipo_vehiculo' => 'required|exists:tipo_vehiculo,id',
+        'id_cliente' => 'nullable|exists:cliente,id',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json([
+            'error' => 'Validación fallida',
+            'details' => $validator->errors(),
+        ], 422);
     }
+
+    try {
+        $vehiculo = Vehiculo::create($request->all());
+
+        return response()->json(["data" => $vehiculo], 201);
+    } catch (QueryException $e) {
+        return response()->json(["error" => "Error al crear el vehículo"], 500);
+    } catch (Exception $e) {
+        return response()->json(["error" => $e->getMessage()], 500);
+    }
+    }
+    public function GetByPlaca(Request $request): JsonResponse
+{
+    try {
+        $vehiculo = Vehiculo::whereRaw('LOWER(placa) = ?', [strtolower($request->query('placa'))])->firstOrFail();
+        return response()->json(['data' => $vehiculo], 200);
+    } catch (ModelNotFoundException $e) {
+        return response()->json(['error' => 'Vehículo no encontrado'], 404);
+    } catch (Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
 
     public function getPaginate(): JsonResponse
     {
