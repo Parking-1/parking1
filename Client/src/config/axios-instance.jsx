@@ -3,7 +3,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 
 const axiosInstance = axios.create({
-  baseURL: "http://parking.local:8080/api",
+  baseURL: "/api",
   withCredentials: true, // Incluye cookies (para JWT con HttpOnly)
 });
 

@@ -22,13 +22,23 @@ const Salidas = () => {
     }
 
     try {
-      const res = await axios.get(`/transaccion/placa/${placaBuscar}`, {
-        withCredentials: true,
-      });
+      const res = await axios.get(
+        `/transaccion/placa/${placaBuscar.trim().toUpperCase()}`,
+        {
+          withCredentials: true,
+        }
+      );
       setTransaccion(res.data.data);
       setLavado(res.data.data.lavado); // Cargar si ya había
+      setError("");
     } catch (error) {
-      toast.error("❌ Transacción no encontrada");
+      if (error.response?.status === 404) {
+        toast.info(
+          "ℹ️ No hay transacción activa para esa placa (ya pudo haber salido)"
+        );
+      } else {
+        toast.error("❌ Error inesperado al buscar transacción");
+      }
       setTransaccion(null);
       setError("❌ No se encontró una transacción activa para esta placa.");
     }
@@ -51,8 +61,8 @@ const Salidas = () => {
   const cerrarTransaccion = async () => {
     try {
       await axios.put(
-        `/transaccion/cerrar/${transaccion.id}`,
-        { lavado },
+        `/transaccion/${transaccion.id}/cerrar`,
+        { lavado: transaccion.lavado },
         {
           withCredentials: true,
         }

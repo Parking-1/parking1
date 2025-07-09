@@ -37,7 +37,7 @@ class UserController extends Controller
             }
             // Enviar token como cookie HTTP-only
             return response()->json(['message' => 'Autenticado correctamente'])
-            ->withCookie(cookie('token', $token, 60, '/', null, false, true, false, 'Strict'));
+            ->withCookie(cookie('token', $token, 60, '/', 'parking.local', false, true, false, 'Strict'));
         } catch (JWTException $e) {
             return response()->json(['error' => 'No se pudo crear el token'], 500);
         }

@@ -23,42 +23,40 @@ const Ingresos = () => {
       case "bus":
         return 4;
       default:
-        return 1;
+        return null;
+    }
+  };
+
+  const verificarVehiculo = async () => {
+    try {
+      const res = await axios.get(`/vehiculo/by-placa?placa=${placa}`, {
+        withCredentials: true,
+      });
+      return res.data.data;
+    } catch {
+      return null;
     }
   };
 
   const crearVehiculo = async () => {
     try {
       const res = await axios.post(
-        "/vehiculo",
+        "/vehiculo/first-or-create",
         {
           placa,
           id_tipo_vehiculo: tipoToId(tipo),
-          //id_cliente: null,
         },
         { withCredentials: true }
       );
       return res.data.data;
     } catch (error) {
       if (
-        error.response &&
-        error.response.data &&
-        error.response.data.error === "Validación fallida"
+        error.response?.data?.error === "Validación fallida" &&
+        error.response?.data?.details?.placa
       ) {
-        const detalles = error.response.data.details;
-        if (detalles && detalles.placa && detalles.placa.length > 0) {
-          toast.error(`❌ ${detalles.placa[0]}`);
-        } else {
-          toast.error("❌ Validación fallida.");
-        }
-      } else if (
-        error.response &&
-        error.response.data &&
-        error.response.data.error === "Token no encontrado"
-      ) {
-        toast.error(
-          "❌ Tu sesión ha expirado. Por favor, inicia sesión nuevamente."
-        );
+        toast.error(`❌ ${error.response.data.details.placa[0]}`);
+      } else if (error.response?.data?.error === "Token no encontrado") {
+        toast.error("❌ Tu sesión ha expirado. Inicia sesión nuevamente.");
         setTimeout(() => {
           window.location.href = "/login";
         }, 2000);
@@ -69,6 +67,18 @@ const Ingresos = () => {
     }
   };
 
+  /*const verificarTransaccionActiva = async (vehiculoId) => {
+    try {
+      const res = await axios.get("/transaccion/pendiente-por-id", {
+        params: { id: vehiculoId },
+        withCredentials: true,
+      });
+      return res.data.data;
+    } catch {
+      return null;
+    }
+  };*/
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -77,14 +87,34 @@ const Ingresos = () => {
       return;
     }
 
-    const vehiculo = await crearVehiculo();
-    if (!vehiculo) return;
+    let vehiculo = await verificarVehiculo();
+
+    if (vehiculo && vehiculo.id_tipo_vehiculo !== tipoToId(tipo)) {
+      toast.error(
+        "❌ Ya existe un vehículo con esta placa y un tipo diferente."
+      );
+      return;
+    }
+
+    if (!vehiculo) {
+      vehiculo = await crearVehiculo();
+      if (!vehiculo) return;
+    }
+
+    /*const transaccionActiva = await verificarTransaccionActiva(vehiculo.id);
+    if (transaccionActiva) {
+      toast.error(
+        "❌ Este vehículo ya tiene un ingreso sin salida registrada."
+      );
+      return;
+    }*/
 
     try {
       await axios.post(
         "/transaccion",
         {
-          id_vehiculo: vehiculo.id,
+          placa: placa.toUpperCase(),
+          id_tipo_vehiculo: tipoToId(tipo),
           lavado,
         },
         { withCredentials: true }
@@ -97,7 +127,6 @@ const Ingresos = () => {
       setFecha("");
       setLavado(false);
     } catch (error) {
-      console.error("Error al registrar ingreso:", error);
       toast.error("❌ Ocurrió un error al registrar el ingreso.");
     }
   };

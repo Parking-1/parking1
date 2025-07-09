@@ -7,72 +7,60 @@ use App\Http\Controllers\TarifaController;
 use App\Http\Controllers\TransaccionController;
 use App\Http\Controllers\UserController;
 
-//use App\Http\Controllers\CargoController;
-
+// Rutas de vehículos
 Route::prefix("vehiculo")->middleware('jwt.cookie')->group(function () {
-
-    // Crear vehículos
     Route::post("/", [VehiculoController::class, "save"]);
     Route::post("/addrange", [VehiculoController::class, "AddRange"]);
 
-    // Lectura especializada
     Route::get("/with-cliente", [VehiculoController::class, "GetWithCliente"]);
     Route::get("/grouped", [VehiculoController::class, "GetGroupVehiculos"]);
     Route::get("/report", [VehiculoController::class, "GetReport"]);
 
-    // Lectura general
     Route::get("/", [VehiculoController::class, "GetPaginate"]);
     Route::get("/{id}", [VehiculoController::class, "GetById"]);
 
-    // Eliminación
     Route::delete("/{id}", [VehiculoController::class, "Delete"]);
     Route::delete("/", [VehiculoController::class, "DeleteRange"]);
 
-    // Actualización
     Route::put("/{id}", [VehiculoController::class, "Update"]);
-
-    Route::get('/vehiculo/by-placa', [VehiculoController::class, 'GetByPlaca'])->middleware('jwt.cookie');
-
-    Route::get('/transaccion/placa/{placa}', [TransaccionController::class, 'getByPlaca']);
-
 });
 
+// ✅ Ruta independiente para buscar vehículo por placa
+Route::get('/vehiculo/by-placa', [VehiculoController::class, 'GetByPlaca'])->middleware('jwt.cookie');
+
+// ✅ Ruta independiente para buscar transacción activa por placa
+Route::get('/transaccion/placa/{placa}', [TransaccionController::class, 'GetByPlaca'])->middleware('jwt.cookie');
+
+// Rutas para tipos de vehículos y tarifas
 Route::get('/tipos-vehiculo', [TipoVehiculoController::class, 'GetAll']);
 Route::get('/tarifa-all', [TarifaController::class, 'GetAll']);
 
-
-
 Route::middleware(['jwt.cookie', 'is.admin'])->group(function () {
-    //Route::post('/tarifa-all', [TarifaController::class, 'store']);
     Route::post('/tarifa-all', [TarifaController::class, 'Save']);
     Route::put('/tarifa-all/{id}', [TarifaController::class, 'Update']);
     Route::delete('/tarifa-all/{id}', [TarifaController::class, 'Delete']);
 });
 
+// Rutas de transacciones
 Route::prefix("transaccion")->middleware('jwt.cookie')->group(function () {
-
-    // Registrar entrada
     Route::post("/", [TransaccionController::class, "Save"]);
-
-    // Cerrar transacción (salida)
     Route::put("/{id}/cerrar", [TransaccionController::class, "CerrarTransaccion"]);
 
-    // Consultar
     Route::get("/", [TransaccionController::class, "GetPaginate"]);
     Route::get("/{id}", [TransaccionController::class, "GetById"]);
     Route::get("/between/fechas", [TransaccionController::class, "GetBetween"]);
 
-    // Actualizar o eliminar
     Route::put("/{id}", [TransaccionController::class, "Update"]);
     Route::delete("/{id}", [TransaccionController::class, "Delete"]);
     Route::delete("/", [TransaccionController::class, "DeleteRange"]);
 });
 
+// Autenticación de usuarios
 Route::post('/user/authenticate', [UserController::class, 'authenticate']);
-// Registro de usuarios
 Route::post('/user/register', [UserController::class, 'register']);
 
-
+Route::post('/vehiculo/first-or-create', [VehiculoController::class, 'firstOrCreateByPlaca']);
 
 //Route::get('/cargo', [CargoController::class, 'index']);
+
 

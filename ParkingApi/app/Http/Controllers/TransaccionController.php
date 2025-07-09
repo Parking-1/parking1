@@ -19,9 +19,21 @@ class TransaccionController extends Controller
 {
     public function Save(Request $request): JsonResponse
     {
+
         try {
-            $vehiculo = Vehiculo::findOrFail($request->id_vehiculo);
-            $this->authorize('create', Transaccion::class);
+            $vehiculo = Vehiculo::firstOrCreate(
+            ['placa' => strtoupper($request->placa)],
+            ['id_tipo_vehiculo' => $request->id_tipo_vehiculo]
+        );
+
+        // Validar tipo de vehículo existente si ya está registrado
+        if ($vehiculo->wasRecentlyCreated === false && $vehiculo->id_tipo_vehiculo !== $request->id_tipo_vehiculo) {
+            return response()->json([
+                "error" => "Ya existe un vehículo con esta placa y con un tipo diferente."
+            ], 400);
+        }
+
+        $this->authorize('create', Transaccion::class);
 
             $espacio = Espacio::where('estado', 'disponible')->first();
             if (!$espacio) {
@@ -85,13 +97,13 @@ class TransaccionController extends Controller
         }
     }
 
-    public function GetByPlaca(Request $request): JsonResponse
+    public function GetByPlaca(string $placa): JsonResponse
     {
         try {
-            $placa = strtoupper($request->query('placa'));
+            //$placa = strtoupper($request->query('placa'));
 
-            $trans = Transaccion::with(['Vehiculo.TipoVehiculo', 'Tarifa', 'Espacio'])
-                ->whereHas('Vehiculo', fn ($q) => $q->where('placa', $placa))
+            $trans = Transaccion::with(['vehiculo.tipoVehiculo', 'tarifa', 'espacio'])
+                ->whereHas('vehiculo', fn ($q) => $q->where('placa', strtoupper($placa)))
                 ->whereNull('fecha_salida')
                 ->firstOrFail();
 
