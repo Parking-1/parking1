@@ -21,5 +21,11 @@ class Cliente extends Model
     {
         return $this->hasMany(Vehiculo::class, "id_cliente");
     }
+
+    public function planes()
+{
+    return $this->hasMany(PlanAbonado::class, 'cliente_id');
+}
+
 }
 

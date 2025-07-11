@@ -21,7 +21,7 @@ class VehiculoSeeder extends Seeder
             [
                 "placa" => "abc123",
                 "id_cliente" => 32,
-                "id_tipo_vehiculo" => 1
+                "id_tipo_vehiculo" => 3
             ],
             [
                 "placa" => "acf234",

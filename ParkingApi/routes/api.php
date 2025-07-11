@@ -6,6 +6,7 @@ use App\Http\Controllers\TipoVehiculoController;
 use App\Http\Controllers\TarifaController;
 use App\Http\Controllers\TransaccionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ClienteController; // 🔧 <- ESTO FALTABA
 
 // Rutas de vehículos
 Route::prefix("vehiculo")->middleware('jwt.cookie')->group(function () {
@@ -25,10 +26,10 @@ Route::prefix("vehiculo")->middleware('jwt.cookie')->group(function () {
     Route::put("/{id}", [VehiculoController::class, "Update"]);
 });
 
-// ✅ Ruta independiente para buscar vehículo por placa
+// ✅ Buscar vehículo por placa
 Route::get('/vehiculo/by-placa', [VehiculoController::class, 'GetByPlaca'])->middleware('jwt.cookie');
 
-// ✅ Ruta independiente para buscar transacción activa por placa
+// ✅ Buscar transacción activa por placa
 Route::get('/transaccion/placa/{placa}', [TransaccionController::class, 'GetByPlaca'])->middleware('jwt.cookie');
 
 // Rutas para tipos de vehículos y tarifas
@@ -59,8 +60,23 @@ Route::prefix("transaccion")->middleware('jwt.cookie')->group(function () {
 Route::post('/user/authenticate', [UserController::class, 'authenticate']);
 Route::post('/user/register', [UserController::class, 'register']);
 
+// Crear vehículo desde React si no existe
 Route::post('/vehiculo/first-or-create', [VehiculoController::class, 'firstOrCreateByPlaca']);
 
-//Route::get('/cargo', [CargoController::class, 'index']);
+// ✅ Rutas de búsqueda de cliente
+Route::prefix("cliente")->middleware('jwt.cookie')->group(function () {
+    Route::get("/by-placa/{placa}", [ClienteController::class, "getByPlaca"]);
+    Route::get("/by-documento/{cedula}", [ClienteController::class, "getByDocumento"]);
+    Route::get("/by-nombre-apellido", [ClienteController::class, "getByNombreApellido"]);
+});
 
+Route::post("/cliente/abonado", [ClienteController::class, "SaveAbonado"]);
 
+Route::post("/cliente/abonado-plan", [ClienteController::class, "SavePlanAbonado"]);
+
+Route::get('/cliente/{id}/plan-activo', [ClienteController::class, 'tienePlanActivo']);
+
+Route::get('/planes-abonado/{clienteId}', [PlanAbonadoController::class, 'getByCliente']);
+Route::delete('/planes-abonado/{id}', [PlanAbonadoController::class, 'destroy']);
+
+Route::put('/planes-abonado/{id}', [PlanAbonadoController::class, 'update']);

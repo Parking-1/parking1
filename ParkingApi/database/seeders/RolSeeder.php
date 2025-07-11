@@ -12,10 +12,8 @@ class RolSeeder extends Seeder
      */
     public function run(): void
     {
-        Rol::insert([
-            ['nombre' => 'administrador'],
-            ['nombre' => 'empleado'],
-        ]);
+        Rol::firstOrCreate(['nombre' => 'administrador']);
+        Rol::firstOrCreate(['nombre' => 'empleado']);
     }
 }
 

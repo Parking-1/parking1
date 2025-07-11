@@ -13,13 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('cliente', function (Blueprint $table) {
-            $table->id();
-            $table->string("nombre", 50);
-            $table->string("apellido", 50);
-            $table->string("cedula", 50)->unique();
-            $table->integer("telefono");
-            $table->timestamps();
+        Schema::table('plan_abonado', function (Blueprint $table) {
+            //$table->date('fecha_fin')->nullable()->after('fecha_inicio');
         });
     }
 
@@ -30,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cliente');
+        Schema::table('plan_abonado', function (Blueprint $table) {
+            $table->dropColumn('fecha_fin');
+        });
     }
 };
