@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use App\Models\Cliente;
 use Illuminate\Http\JsonResponse;
+use App\Models\Cliente;
+use App\Models\PlanAbonado;
+use App\Models\Vehiculo;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Exception;
+use Carbon\Carbon;
 
 class ClienteController extends Controller
 {
@@ -36,7 +39,6 @@ class ClienteController extends Controller
         }
     }
 
-    // 🔍 Buscar por documento (cedula)
     public function getByDocumento(string $cedula): JsonResponse
     {
         try {
@@ -49,7 +51,6 @@ class ClienteController extends Controller
         }
     }
 
-    // 🔍 Buscar por placa
     public function getByPlaca(string $placa): JsonResponse
     {
         try {
@@ -65,17 +66,18 @@ class ClienteController extends Controller
         }
     }
 
-    // 🔍 Buscar por nombre y apellido (opcional)
     public function getByNombreApellido(Request $request): JsonResponse
     {
         try {
-            $nombre   = $request->input('nombre');
-            $apellido = $request->input('apellido');
-
             $query = Cliente::query();
 
-            if ($nombre) $query->where('nombre', 'LIKE', "%$nombre%");
-            if ($apellido) $query->where('apellido', 'LIKE', "%$apellido%");
+            if ($request->filled('nombre')) {
+                $query->where('nombre', 'LIKE', '%' . $request->nombre . '%');
+            }
+
+            if ($request->filled('apellido')) {
+                $query->where('apellido', 'LIKE', '%' . $request->apellido . '%');
+            }
 
             $clientes = $query->with('vehiculo')->get();
 
@@ -87,127 +89,190 @@ class ClienteController extends Controller
 
     public function SaveAbonado(Request $request): JsonResponse
     {
-    try {
-        $request->validate([
-    'nombre'   => 'required|string|max:50',
-    'apellido' => 'required|string|max:50',
-    'cedula'   => 'required|string|max:50|unique:cliente,cedula',
-    'telefono' => 'required|string|max:50',
-]);
-
-        $cliente = Cliente::create([
-            "nombre"   => $request->input("nombre"),
-            "apellido"=> $request->input("apellido"),
-            "cedula"  => $request->input("cedula"),
-            "telefono"=> $request->input("telefono"),
-        ]);
-
-        // Si también quieres guardar el vehículo:
-        if ($request->filled("placa")) {
-            $cliente->vehiculo()->create([
-                "placa"            => strtoupper($request->input("placa")),
-                "id_tipo_vehiculo" => $request->input("id_tipo_vehiculo", 1) // por defecto tipo 1
+        try {
+            $request->validate([
+                'nombre'   => 'required|string|max:50',
+                'apellido' => 'required|string|max:50',
+                'cedula'   => 'required|string|max:50|unique:clientes,cedula',
+                'telefono' => 'required|string|max:50',
             ]);
-        }
 
-        return response()->json(["data" => $cliente], 201);
-    } catch (Exception $e) {
-        return response()->json(["error" => $e->getMessage()], 500);
-    }
+            $cliente = Cliente::create($request->only(['nombre', 'apellido', 'cedula', 'telefono']));
+
+            if ($request->filled("placa")) {
+                $cliente->vehiculo()->create([
+                    "placa"            => strtoupper($request->input("placa")),
+                    "id_tipo_vehiculo" => $request->input("id_tipo_vehiculo", 1),
+                ]);
+            }
+
+            return response()->json(["data" => $cliente], 201);
+        } catch (Exception $e) {
+            return response()->json(["error" => $e->getMessage()], 500);
+        }
     }
 
     public function SavePlanAbonado(Request $request): JsonResponse
-{
-    $request->validate([
-    'nombre'       => 'required|string|max:50',
-    'apellido'     => 'required|string|max:50',
-    'cedula'       => 'required|string|max:50|unique:cliente,cedula',
-    'telefono'     => 'required|string|max:50',
-    'tipo_plan'    => 'required|string',
-    'duracion'     => 'required|integer',
-    'monto'        => 'required|numeric',
-    'total'        => 'required|numeric',
-    'fecha_inicio' => 'required|date',
-]);
-
-    try {
-        DB::transaction(function () use ($request) {
-            // 1. Crear cliente
-            $cliente = Cliente::firstOrCreate([
-                'nombre'    => $request->nombre,
-                'apellido'  => $request->apellido,
-                'cedula'    => $request->cedula,
-                'telefono'  => $request->telefono,
-            ]);
-
-            // Si el cliente tiene un plan vigente, rechazar
-            $tienePlanActivo = $cliente->planes()
-                ->whereDate('fecha_fin', '>=', now())
-                ->exists();
-
-            if ($tienePlanActivo) {
-                throw new \Exception('Este cliente ya tiene un plan activo.');
-            }
-
-            // 2. Crear vehículo si aplica
-            if ($request->filled('placa')) {
-                $cliente->vehiculo()->create([
-                    'placa'            => strtoupper($request->placa),
-                    'id_tipo_vehiculo' => $request->id_tipo_vehiculo ?? 1
-                ]);
-            }
-            $fechaFin = now()->parse($request->fecha_inicio)->addDays($request->duracion);
-            // 3. Crear plan del abonado
-            $cliente->planes()->create([
-                'tipo_plan'    => $request->tipo_plan,
-                'duracion'     => (int) $request->duracion,
-                'monto'        => $request->monto,
-                'total'        => $request->total,
-                'fecha_inicio' => $request->fecha_inicio,
-                'fecha_fin'    => $fechaFin, // <-- nueva columna
-            ]);
-        });
-
-        return response()->json(['message' => 'Plan del abonado guardado'], 201);
-    } catch (Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
-    }
-}
-    public function tienePlanActivo($id): JsonResponse
-{
-    try {
-        $cliente = Cliente::with(['planes' => function ($q) {
-            $q->whereDate('fecha_fin', '>=', now());
-        }])->findOrFail($id);
-
-        $activo = $cliente->planes->isNotEmpty();
-
-        return response()->json([
-            'activo' => $activo,
-            'vigente_hasta' => $activo ? $cliente->planes->first()->fecha_fin : null
+    {
+        $request->validate([
+            'nombre'       => 'required|string|max:50',
+            'apellido'     => 'required|string|max:50',
+            'cedula'       => 'required|string|max:50',
+            'telefono'     => 'required|string|max:50',
+            'tipo_plan'    => 'required|string',
+            'duracion'     => 'required|integer',
+            'monto'        => 'required|numeric',
+            'total'        => 'required|numeric',
+            'fecha_inicio' => 'required|date',
         ]);
-    } catch (Exception $e) {
-        return response()->json(["error" => $e->getMessage()], 500);
+
+        try {
+            DB::transaction(function () use ($request) {
+                $cliente = Cliente::firstOrCreate(
+                    ['cedula' => $request->cedula],
+                    [
+                        'nombre'   => $request->nombre,
+                        'apellido' => $request->apellido,
+                        'telefono' => $request->telefono,
+                    ]
+                );
+
+                $tienePlanActivo = $cliente->planes()
+                    ->whereDate('fecha_fin', '>=', now())
+                    ->exists();
+
+                if ($tienePlanActivo) {
+                    throw new Exception('Este cliente ya tiene un plan activo.');
+                }
+
+                if ($request->filled('placa')) {
+                    $cliente->vehiculo()->firstOrCreate([
+                        'placa'            => strtoupper($request->placa),
+                        'id_tipo_vehiculo' => $request->id_tipo_vehiculo ?? 1,
+                    ]);
+                }
+
+                $fechaFin = Carbon::parse($request->fecha_inicio)->addDays($request->duracion);
+
+                $cliente->planes()->create([
+                    'tipo_plan'    => $request->tipo_plan,
+                    'duracion'     => $request->duracion,
+                    'monto'        => $request->monto,
+                    'total'        => $request->total,
+                    'fecha_inicio' => $request->fecha_inicio,
+                    'fecha_fin'    => $fechaFin,
+                ]);
+            });
+
+            return response()->json(['message' => 'Plan del abonado guardado'], 201);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function tienePlanActivo($id): JsonResponse
+    {
+        try {
+            $cliente = Cliente::with(['planes' => function ($q) {
+                $q->whereDate('fecha_fin', '>=', now());
+            }])->findOrFail($id);
+
+            $activo = $cliente->planes->isNotEmpty();
+
+            return response()->json([
+                'activo' => $activo,
+                'vigente_hasta' => $activo ? $cliente->planes->first()->fecha_fin : null,
+            ]);
+        } catch (Exception $e) {
+            return response()->json(["error" => $e->getMessage()], 500);
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'tipo_plan'    => 'required|string',
+            'duracion'     => 'required|integer',
+            'monto'        => 'required|numeric',
+            'total'        => 'required|numeric',
+            'fecha_inicio' => 'required|date',
+            'fecha_fin'    => 'required|date',
+        ]);
+
+        $plan = PlanAbonado::findOrFail($id);
+        $plan->update($request->only([
+            'tipo_plan', 'duracion', 'monto', 'total', 'fecha_inicio', 'fecha_fin',
+        ]));
+
+        return response()->json(['message' => 'Plan actualizado']);
+    }
+
+    public function buscarPlanPorCodigo(Request $request): JsonResponse
+    {
+        $codigo = $request->input('codigo_plan');
+
+        try {
+            $plan = DB::table('plan_abonado')
+                ->join('clientes', 'plan_abonado.cliente_id', '=', 'clientes.id')
+                ->leftJoin('vehiculos', 'vehiculos.cliente_id', '=', 'clientes.id')
+                ->select(
+                    'plan_abonado.id as plan_id',
+                    'clientes.nombre',
+                    'clientes.apellido',
+                    'clientes.cedula',
+                    'vehiculos.placa',
+                    'plan_abonado.fecha_inicio',
+                    'plan_abonado.fecha_fin'
+                )
+                ->where('plan_abonado.id', $codigo)
+                ->first();
+
+            if (!$plan) {
+                return response()->json(['error' => 'Plan no encontrado'], 404);
+            }
+
+            return response()->json(['data' => $plan], 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function buscarPagos(Request $request)
+    {
+        $query = PlanAbonado::with('cliente', 'vehiculo');
+
+        if ($request->filled('codigo_plan')) {
+            $query->where('id', $request->codigo_plan);
+        }
+
+        if ($request->filled('nombres')) {
+            $query->whereHas('cliente', fn($q) =>
+                $q->where('nombre', 'like', '%' . $request->nombres . '%')
+                  ->orWhere('apellido', 'like', '%' . $request->nombres . '%')
+            );
+        }
+
+        if ($request->filled('documento')) {
+            $query->whereHas('cliente', fn($q) =>
+                $q->where('cedula', $request->documento)
+            );
+        }
+
+        if ($request->filled('placa')) {
+            $query->whereHas('vehiculo', fn($q) =>
+                $q->where('placa', strtoupper($request->placa))
+            );
+        }
+
+        if ($request->filled('fecha')) {
+            $query->whereDate('fecha_inicio', $request->fecha);
+        }
+
+        if ($request->filled('vencimiento')) {
+            $query->whereDate('fecha_fin', $request->vencimiento);
+        }
+
+        return response()->json(['data' => $query->orderByDesc('fecha_inicio')->get()]);
     }
 }
 
-public function update(Request $request, $id)
-{
-    $request->validate([
-        'tipo_plan' => 'required|string',
-        'duracion' => 'required|integer',
-        'monto' => 'required|numeric',
-        'total' => 'required|numeric',
-        'fecha_inicio' => 'required|date',
-        'fecha_fin' => 'required|date',
-    ]);
-
-    $plan = PlanAbonado::findOrFail($id);
-    $plan->update($request->only([
-        'tipo_plan', 'duracion', 'monto', 'total', 'fecha_inicio', 'fecha_fin'
-    ]));
-
-    return response()->json(['message' => 'Plan actualizado']);
-}
-
-}

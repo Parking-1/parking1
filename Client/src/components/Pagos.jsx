@@ -1,16 +1,48 @@
+import { useState } from "react";
+import axios from "axios";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
 const Pagos = () => {
+  const [filtros, setFiltros] = useState({
+    codigo_plan: "",
+    nombres: "",
+    documento: "",
+    placa: "",
+    fecha: "",
+    vencimiento: "",
+  });
+
+  const [resultados, setResultados] = useState([]);
+
+  const handleChange = (e) => {
+    setFiltros({
+      ...filtros,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const buscarPagos = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post("/api/pagos/buscar", filtros, {
+        withCredentials: true, // incluye cookies JWT
+      });
+      setResultados(res.data.data);
+    } catch (error) {
+      console.error("Error buscando pagos:", error);
+      alert("Ocurrió un error al buscar los pagos.");
+    }
+  };
+
   return (
     <div>
       <Navbar />
       <div className="flex">
         <Sidebar />
-        <div className="flex flex-col justify-center items-center mx-auto my-10 w-full max-w-4xl">
+        <div className="flex flex-col justify-center items-center mx-auto my-10 w-full max-w-5xl">
           <div className="bg-white shadow-md p-6 rounded-lg w-full">
-            <form className="space-y-4">
-              {/* Buscar */}
+            <form className="space-y-4" onSubmit={buscarPagos}>
               <div className="flex flex-wrap items-end gap-4">
                 <button
                   type="submit"
@@ -18,81 +50,97 @@ const Pagos = () => {
                 >
                   Buscar
                 </button>
-                <div className="flex flex-col flex-1">
-                  <label htmlFor="codigoPlan" className="font-medium mb-1">
-                    Código del plan
-                  </label>
-                  <input
-                    id="codigoPlan"
-                    name="codigoPlan"
-                    type="text"
-                    className="w-full h-12 px-4 py-2 border rounded-lg"
-                    placeholder="Ej: 001234"
-                  />
-                </div>
-              </div>
 
-              {/* Datos del abonado */}
-              <div>
-                <label htmlFor="nombres" className="block font-medium mb-1">
-                  Nombres y Apellidos
-                </label>
                 <input
-                  id="nombres"
+                  name="codigo_plan"
+                  value={filtros.codigo_plan}
+                  onChange={handleChange}
+                  type="text"
+                  className="h-12 px-4 border rounded-md w-full md:w-48"
+                  placeholder="Código del plan"
+                />
+
+                <input
                   name="nombres"
+                  value={filtros.nombres}
+                  onChange={handleChange}
                   type="text"
-                  className="w-full h-12 px-4 py-2 border rounded-lg"
+                  className="h-12 px-4 border rounded-md w-full md:w-48"
+                  placeholder="Nombres/Apellidos"
                 />
-              </div>
 
-              <div>
-                <label htmlFor="documento" className="block font-medium mb-1">
-                  Documento
-                </label>
                 <input
-                  id="documento"
                   name="documento"
+                  value={filtros.documento}
+                  onChange={handleChange}
                   type="text"
-                  className="w-full h-12 px-4 py-2 border rounded-lg"
+                  className="h-12 px-4 border rounded-md w-full md:w-48"
+                  placeholder="Documento"
                 />
-              </div>
 
-              <div>
-                <label htmlFor="placa" className="block font-medium mb-1">
-                  Placa del Vehículo
-                </label>
                 <input
-                  id="placa"
                   name="placa"
+                  value={filtros.placa}
+                  onChange={handleChange}
                   type="text"
-                  className="w-full h-12 px-4 py-2 border rounded-lg uppercase"
+                  className="h-12 px-4 border rounded-md w-full md:w-48 uppercase"
+                  placeholder="Placa"
                 />
-              </div>
 
-              <div>
-                <label htmlFor="fecha" className="block font-medium mb-1">
-                  Fecha del Pago
-                </label>
                 <input
-                  id="fecha"
                   name="fecha"
+                  value={filtros.fecha}
+                  onChange={handleChange}
                   type="date"
-                  className="w-full h-12 px-4 py-2 border rounded-lg"
+                  className="h-12 px-4 border rounded-md w-full md:w-48"
                 />
-              </div>
 
-              <div>
-                <label htmlFor="vencimiento" className="block font-medium mb-1">
-                  Fecha de Vencimiento del Plan
-                </label>
                 <input
-                  id="vencimiento"
                   name="vencimiento"
+                  value={filtros.vencimiento}
+                  onChange={handleChange}
                   type="date"
-                  className="w-full h-12 px-4 py-2 border rounded-lg"
+                  className="h-12 px-4 border rounded-md w-full md:w-48"
                 />
               </div>
             </form>
+
+            {/* Resultados */}
+            <div className="mt-10">
+              <h2 className="text-lg font-semibold mb-4">
+                Resultados encontrados: {resultados.length}
+              </h2>
+              <table className="w-full text-sm border">
+                <thead className="bg-gray-200">
+                  <tr>
+                    <th className="border px-2">#</th>
+                    <th className="border px-2">Código</th>
+                    <th className="border px-2">Nombre</th>
+                    <th className="border px-2">Documento</th>
+                    <th className="border px-2">Placa</th>
+                    <th className="border px-2">Inicio</th>
+                    <th className="border px-2">Fin</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {resultados.map((plan, i) => (
+                    <tr key={plan.id}>
+                      <td className="border px-2">{i + 1}</td>
+                      <td className="border px-2">{plan.id}</td>
+                      <td className="border px-2">
+                        {plan.cliente?.nombre} {plan.cliente?.apellido}
+                      </td>
+                      <td className="border px-2">{plan.cliente?.cedula}</td>
+                      <td className="border px-2">
+                        {plan.vehiculo?.placa || "-"}
+                      </td>
+                      <td className="border px-2">{plan.fecha_inicio}</td>
+                      <td className="border px-2">{plan.fecha_fin}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>

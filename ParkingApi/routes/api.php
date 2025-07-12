@@ -7,6 +7,9 @@ use App\Http\Controllers\TarifaController;
 use App\Http\Controllers\TransaccionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClienteController; // 🔧 <- ESTO FALTABA
+use App\Http\Controllers\MovimientoCajaController;
+use App\Http\Controllers\PlanAbonadoController;
+
 
 // Rutas de vehículos
 Route::prefix("vehiculo")->middleware('jwt.cookie')->group(function () {
@@ -80,3 +83,20 @@ Route::get('/planes-abonado/{clienteId}', [PlanAbonadoController::class, 'getByC
 Route::delete('/planes-abonado/{id}', [PlanAbonadoController::class, 'destroy']);
 
 Route::put('/planes-abonado/{id}', [PlanAbonadoController::class, 'update']);
+
+Route::post('/caja', [MovimientoCajaController::class, 'store']);
+Route::get('/caja', [MovimientoCajaController::class, 'index']);
+
+Route::get('/planes-abonado', [PlanAbonadoController::class, 'getByCliente']);
+
+Route::get('/cliente/plan-abonado/buscar', [ClienteController::class, 'buscarPlanPorCodigo']);
+
+Route::get('/cliente/pagos-abonado/buscar', [ClienteController::class, 'buscarPagos']);
+
+Route::get('/cliente/pagos-buscar', [ClienteController::class, 'buscarPagos']);
+
+Route::prefix("pagos")->group(function () {
+    Route::post("/buscar", [ClienteController::class, "buscarPagos"]);
+});
+
+
