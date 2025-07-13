@@ -161,6 +161,7 @@ class ClienteController extends Controller
                     'total'        => $request->total,
                     'fecha_inicio' => $request->fecha_inicio,
                     'fecha_fin'    => $fechaFin,
+                    'vehiculo_id'  => $vehiculo?->id, // ✅ aquí se guarda el ID
                 ]);
             });
 

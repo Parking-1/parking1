@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClienteController; // 🔧 <- ESTO FALTABA
 use App\Http\Controllers\MovimientoCajaController;
 use App\Http\Controllers\PlanAbonadoController;
+use App\Http\Controllers\ReporteController;
 
 
 // Rutas de vehículos
@@ -98,5 +99,7 @@ Route::get('/cliente/pagos-buscar', [ClienteController::class, 'buscarPagos']);
 Route::prefix("pagos")->group(function () {
     Route::post("/buscar", [ClienteController::class, "buscarPagos"]);
 });
+
+Route::post('/reportes', [ReporteController::class, 'generar'])->middleware('jwt.cookie');
 
 

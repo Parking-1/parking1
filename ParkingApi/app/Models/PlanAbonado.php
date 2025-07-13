@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Models;
+use App\Models\Vehiculo;
+
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -24,4 +26,9 @@ class PlanAbonado extends Model
     {
         return $this->belongsTo(Cliente::class);
     }
+
+    public function vehiculo()
+{
+    return $this->belongsTo(Vehiculo::class, 'vehiculo_id');
+}
 }
