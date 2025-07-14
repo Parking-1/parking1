@@ -1,51 +1,146 @@
 import { useState } from "react";
+import axios from "axios";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
 const Reportes = () => {
+  const [tipoReporte, setTipoReporte] = useState("");
   const [fechaInicio, setFechaInicio] = useState("");
   const [fechaFinal, setFechaFinal] = useState("");
-  const [tipoReporte, setTipoReporte] = useState("");
-  const [datos, setDatos] = useState([]);
+  const [resultados, setResultados] = useState([]);
 
-  const opciones = [
-    { label: "Listar Tickets", tipo: "tickets" },
-    { label: "Salidas de Vehiculos", tipo: "salidas" },
-    { label: "Vehiculos Estacionados", tipo: "estacionados" },
-    { label: "Pagos de Tickets", tipo: "pagos" },
-  ];
-
-  const handleReporte = async (tipo) => {
+  const handleClick = async (tipo) => {
     if (!fechaInicio || !fechaFinal) {
       alert("Por favor selecciona ambas fechas.");
       return;
     }
 
-    setTipoReporte(tipo);
-
     try {
-      const res = await fetch("/api/reportes", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({
-          tipo,
-          fecha_inicio: fechaInicio,
-          fecha_final: fechaFinal,
-        }),
+      const res = await axios.post("/api/reportes/generar", {
+        tipo,
+        fecha_inicio: fechaInicio,
+        fecha_final: fechaFinal,
       });
 
-      const result = await res.json();
-      if (res.ok) {
-        setDatos(result.data);
-      } else {
-        alert(result.error || "Error al generar reporte");
-      }
-    } catch (err) {
-      console.error(err);
-      alert("Error al conectar con el servidor.");
+      setTipoReporte(tipo);
+      setResultados(res.data.data);
+    } catch (error) {
+      console.error("Error generando reporte:", error);
+      alert("Ocurrió un error al generar el reporte.");
+    }
+  };
+
+  const renderTabla = () => {
+    if (resultados.length === 0)
+      return <p className="text-center mt-6">No hay resultados.</p>;
+
+    switch (tipoReporte) {
+      case "tickets":
+        return (
+          <table className="w-full border mt-6 text-sm">
+            <thead className="bg-gray-200">
+              <tr>
+                <th className="border px-2">#</th>
+                <th className="border px-2">Placa</th>
+                <th className="border px-2">Fecha Entrada</th>
+                <th className="border px-2">Lavado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {resultados.map((t, i) => (
+                <tr key={t.id}>
+                  <td className="border px-2">{i + 1}</td>
+                  <td className="border px-2">{t.placa}</td>
+                  <td className="border px-2">{t.fecha_entrada}</td>
+                  <td className="border px-2">{t.lavado ? "Sí" : "No"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
+
+      case "salidas":
+        return (
+          <table className="w-full border mt-6 text-sm">
+            <thead className="bg-gray-200">
+              <tr>
+                <th className="border px-2">#</th>
+                <th className="border px-2">Placa</th>
+                <th className="border px-2">Entrada</th>
+                <th className="border px-2">Salida</th>
+                <th className="border px-2">Total Pagado</th>
+              </tr>
+            </thead>
+            <tbody>
+              {resultados.map((s, i) => (
+                <tr key={s.id}>
+                  <td className="border px-2">{i + 1}</td>
+                  <td className="border px-2">{s.placa}</td>
+                  <td className="border px-2">{s.fecha_entrada}</td>
+                  <td className="border px-2">{s.fecha_salida}</td>
+                  <td className="border px-2">{s.total}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
+
+      case "estacionados":
+        return (
+          <table className="w-full border mt-6 text-sm">
+            <thead className="bg-gray-200">
+              <tr>
+                <th className="border px-2">#</th>
+                <th className="border px-2">Placa</th>
+                <th className="border px-2">Fecha Entrada</th>
+              </tr>
+            </thead>
+            <tbody>
+              {resultados.map((v, i) => (
+                <tr key={v.id}>
+                  <td className="border px-2">{i + 1}</td>
+                  <td className="border px-2">{v.placa}</td>
+                  <td className="border px-2">{v.fecha_entrada}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
+
+      case "pagos":
+        return (
+          <table className="w-full border mt-6 text-sm">
+            <thead className="bg-gray-200">
+              <tr>
+                <th className="border px-2">#</th>
+                <th className="border px-2">Cliente</th>
+                <th className="border px-2">Documento</th>
+                <th className="border px-2">Placa</th>
+                <th className="border px-2">Inicio</th>
+                <th className="border px-2">Fin</th>
+                <th className="border px-2">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              {resultados.map((p, i) => (
+                <tr key={p.id}>
+                  <td className="border px-2">{i + 1}</td>
+                  <td className="border px-2">
+                    {p.cliente?.nombre} {p.cliente?.apellido}
+                  </td>
+                  <td className="border px-2">{p.cliente?.cedula}</td>
+                  <td className="border px-2">{p.vehiculo?.placa || "-"}</td>
+                  <td className="border px-2">{p.fecha_inicio}</td>
+                  <td className="border px-2">{p.fecha_fin || "-"}</td>
+                  <td className="border px-2">{p.total}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        );
+
+      default:
+        return null;
     }
   };
 
@@ -67,9 +162,9 @@ const Reportes = () => {
               <input
                 id="fechaInicio"
                 type="date"
+                className="border p-2 rounded w-full"
                 value={fechaInicio}
                 onChange={(e) => setFechaInicio(e.target.value)}
-                className="border p-2 rounded w-full"
               />
             </div>
             <div className="flex flex-col w-full md:w-1/3">
@@ -82,39 +177,35 @@ const Reportes = () => {
               <input
                 id="fechaFinal"
                 type="date"
+                className="border p-2 rounded w-full"
                 value={fechaFinal}
                 onChange={(e) => setFechaFinal(e.target.value)}
-                className="border p-2 rounded w-full"
               />
             </div>
           </div>
 
           {/* Opciones de reporte */}
-          <div className="flex justify-center">
+          <div className="flex justify-center mb-6">
             <div className="flex flex-col space-y-4 w-full md:w-1/3">
-              {opciones.map(({ label, tipo }) => (
+              {[
+                { tipo: "tickets", texto: "Listar Tickets" },
+                { tipo: "salidas", texto: "Salidas de Vehículos" },
+                { tipo: "estacionados", texto: "Vehículos Estacionados" },
+                { tipo: "pagos", texto: "Pagos de Abonados" },
+              ].map((btn) => (
                 <button
-                  key={tipo}
-                  onClick={() => handleReporte(tipo)}
+                  key={btn.tipo}
                   className="bg-blue-500 text-white py-3 px-6 rounded hover:bg-blue-600 transition"
+                  onClick={() => handleClick(btn.tipo)}
                 >
-                  {label}
+                  {btn.texto}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Resultados */}
-          {datos.length > 0 && (
-            <div className="mt-10">
-              <h2 className="text-xl font-semibold mb-4 text-center capitalize">
-                Resultados de {tipoReporte.replace(/_/g, " ")} ({datos.length})
-              </h2>
-              <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-[400px] text-sm">
-                {JSON.stringify(datos, null, 2)}
-              </pre>
-            </div>
-          )}
+          {/* Tabla de resultados */}
+          <div>{renderTabla()}</div>
         </div>
       </div>
     </div>

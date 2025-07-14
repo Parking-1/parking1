@@ -7,6 +7,8 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use App\Models\Cargo;
+
 
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
@@ -67,6 +69,10 @@ public function isGranted(string|array $roles): bool
     }
 
     return $this->roles()->whereIn('nombre', $roles)->exists();
+}
+    public function cargo()
+{
+    return $this->belongsTo(Cargo::class, 'id_cargo');
 }
 
 }

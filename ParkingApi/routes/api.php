@@ -5,12 +5,11 @@ use App\Http\Controllers\VehiculoController;
 use App\Http\Controllers\TipoVehiculoController;
 use App\Http\Controllers\TarifaController;
 use App\Http\Controllers\TransaccionController;
-use App\Http\Controllers\UserController;
 use App\Http\Controllers\ClienteController; // 🔧 <- ESTO FALTABA
 use App\Http\Controllers\MovimientoCajaController;
 use App\Http\Controllers\PlanAbonadoController;
 use App\Http\Controllers\ReporteController;
-
+use App\Http\Controllers\UserController;
 
 // Rutas de vehículos
 Route::prefix("vehiculo")->middleware('jwt.cookie')->group(function () {
@@ -102,4 +101,20 @@ Route::prefix("pagos")->group(function () {
 
 Route::post('/reportes', [ReporteController::class, 'generar'])->middleware('jwt.cookie');
 
+Route::get('/reportes/tickets', [ReporteController::class, 'listarTickets']);
+Route::get('/reportes/salidas', [ReporteController::class, 'salidasVehiculos']);
+Route::get('/reportes/estacionados', [ReporteController::class, 'vehiculosEstacionados']);
+Route::get('/reportes/pagos', [ReporteController::class, 'pagosTickets']);
+
+Route::middleware('jwt.cookie')->group(function () {
+    Route::get('/usuarios', [UserController::class, 'index']);
+    Route::delete('/usuarios/{id}', [UserController::class, 'destroy']);
+});
+
+Route::middleware(['jwt.cookie'])->prefix('usuarios')->group(function () {
+    Route::get('/', [UserController::class, 'index']);
+    Route::get('/{id}', [UserController::class, 'show']);
+    Route::put('/{id}', [UserController::class, 'update']);
+    Route::delete('/{id}', [UserController::class, 'destroy']);
+});
 

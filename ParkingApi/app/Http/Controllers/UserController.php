@@ -142,5 +142,56 @@ class UserController extends Controller
             return response()->json(['exists' => false, 'error' => 'Error de servidor'], 500);
         }
     }
+
+    public function index(): JsonResponse
+{
+    $usuarios = User::with('roles', 'cargo')->get();
+
+    return response()->json(['data' => $usuarios], 200);
+}
+
+    public function show($id): JsonResponse
+{
+    try {
+        $usuario = User::with('roles', 'cargo')->findOrFail($id);
+        return response()->json(['data' => $usuario], 200);
+    } catch (ModelNotFoundException $e) {
+        return response()->json(['error' => 'Usuario no encontrado'], 404);
+    }
+}
+    public function update(Request $request, $id): JsonResponse
+{
+    try {
+        $usuario = User::findOrFail($id);
+
+        $usuario->update([
+            'name' => $request->get('name'),
+            'email' => $request->get('email'),
+            'id_cargo' => $request->get('id_cargo'),
+        ]);
+
+        // Opcional: actualizar roles
+        if ($request->has('rol')) {
+            $rol = Rol::where('nombre', $request->rol)->firstOrFail();
+            $usuario->roles()->sync([$rol->id]);
+        }
+
+        return response()->json(['message' => 'Usuario actualizado'], 200);
+    } catch (ModelNotFoundException $e) {
+        return response()->json(['error' => 'Usuario o rol no encontrado'], 404);
+    }
+}
+    public function destroy($id): JsonResponse
+{
+    try {
+        $usuario = User::findOrFail($id);
+        $usuario->delete();
+
+        return response()->json(['message' => 'Usuario eliminado'], 200);
+    } catch (ModelNotFoundException $e) {
+        return response()->json(['error' => 'Usuario no encontrado'], 404);
+    }
+}
+
 }
 
