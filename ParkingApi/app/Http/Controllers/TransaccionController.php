@@ -103,14 +103,16 @@ class TransaccionController extends Controller
             //$placa = strtoupper($request->query('placa'));
 
             $trans = Transaccion::with(['vehiculo.tipoVehiculo', 'tarifa', 'espacio'])
-                ->whereHas('vehiculo', fn ($q) => $q->where('placa', strtoupper($placa)))
                 ->whereNull('fecha_salida')
+                ->whereHas('vehiculo', function ($q) use ($placa) {
+                    $q->whereRaw('UPPER(placa) = ?', [strtoupper($placa)]);
+                })
                 ->firstOrFail();
 
             return response()->json(['data' => $trans], 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(["error" => "Transacción no encontrada"], 404);
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return response()->json(["error" => $e->getMessage()], 500);
         }
     }

@@ -16,7 +16,7 @@ const Reportes = () => {
     }
 
     try {
-      const res = await axios.post("/api/reportes/generar", {
+      const res = await axios.post("/api/reportes", {
         tipo,
         fecha_inicio: fechaInicio,
         fecha_final: fechaFinal,
