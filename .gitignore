@@ -1,0 +1,49 @@
+# ==== GLOBAL ====
+.DS_Store
+*.env
+.env.*
+*.key
+*.bak
+*.tmp
+*.swp
+*.swo
+*.log
+*.pdf
+*.zip
+*.tar.gz
+
+# ==== IDEs ====
+.idea/
+.vscode/
+*.suo
+*.sln
+*.njsproj
+*.sw?
+
+# ==== FRONTEND ====
+Client/node_modules/
+Client/.env
+Client/.next
+Client/dist
+Client/build
+Client/public/hot
+
+# ==== BACKEND (Laravel) ====
+ParkingApi/vendor/
+ParkingApi/.env
+ParkingApi/.phpunit.result.cache
+ParkingApi/public/storage
+ParkingApi/public/hot
+ParkingApi/public/build
+ParkingApi/storage/*.key
+ParkingApi/storage/logs/
+ParkingApi/.fleet/
+
+# ==== ARCHIVOS TEMPORALES ====
+npm-debug.log*
+yarn-error.log*
+firebase-debug.log
+auth.json
+Homestead.json
+Homestead.yaml
+
