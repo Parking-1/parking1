@@ -118,3 +118,6 @@ Route::middleware(['jwt.cookie'])->prefix('usuarios')->group(function () {
     Route::delete('/{id}', [UserController::class, 'destroy']);
 });
 
+Route::post('/reportes/pdf', [ReporteController::class, 'generarPDF'])->middleware('jwt.cookie');
+
+

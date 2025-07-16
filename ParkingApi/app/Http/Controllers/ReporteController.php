@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Transaccion;
 use App\Models\PlanAbonado;
 use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
+
 
 class ReporteController extends Controller
 {
@@ -94,6 +96,43 @@ class ReporteController extends Controller
     }
 
     return response()->json(['data' => $resultado], 200);
+}
+    public function generarPDF(Request $request)
+{
+    $request->validate([
+        'tipo' => 'required|string',
+        'fecha_inicio' => 'required|date',
+        'fecha_final' => 'required|date',
+    ]);
+
+    $inicio = Carbon::parse($request->fecha_inicio)->startOfDay();
+    $fin = Carbon::parse($request->fecha_final)->endOfDay();
+
+    $tipo = $request->tipo;
+    $data = [];
+
+    switch ($tipo) {
+        case 'tickets':
+            $data = Transaccion::with('vehiculo')
+                ->whereBetween('created_at', [$inicio, $fin])
+                ->get()
+                ->map(function ($t) {
+                    return [
+                        'id' => $t->id,
+                        'placa' => $t->vehiculo->placa ?? 'N/A',
+                        'fecha_entrada' => $t->fecha_entrada,
+                        'lavado' => $t->lavado,
+                    ];
+                })->toArray();
+            break;
+
+        default:
+            return response()->json(['error' => 'Tipo de reporte no válido.'], 400);
+    }
+
+    $pdf = Pdf::loadView("pdf.$tipo", [$tipo => $data]);
+
+    return $pdf->download("reporte_$tipo.pdf");
 }
 
 }

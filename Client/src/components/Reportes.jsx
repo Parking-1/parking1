@@ -143,6 +143,40 @@ const Reportes = () => {
         return null;
     }
   };
+  const handleExportarPDF = async () => {
+    if (!fechaInicio || !fechaFinal || !tipoReporte) {
+      alert("Selecciona fechas y tipo de reporte antes de exportar.");
+      return;
+    }
+
+    try {
+      const res = await axios.post(
+        "/api/reportes/pdf",
+        {
+          tipo: tipoReporte,
+          fecha_inicio: fechaInicio,
+          fecha_final: fechaFinal,
+        },
+        {
+          responseType: "blob", // 👈 necesario para manejar archivos binarios
+        }
+      );
+
+      // Crear un enlace para descargar el archivo
+      const blob = new Blob([res.data], { type: "application/pdf" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `reporte_${tipoReporte}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error al exportar PDF:", error);
+      alert("Error al generar el PDF.");
+    }
+  };
 
   return (
     <div>
@@ -201,6 +235,16 @@ const Reportes = () => {
                   {btn.texto}
                 </button>
               ))}
+              {tipoReporte && (
+                <div className="text-center mb-6">
+                  <button
+                    className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
+                    onClick={handleExportarPDF}
+                  >
+                    Exportar en PDF
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
