@@ -120,4 +120,10 @@ Route::middleware(['jwt.cookie'])->prefix('usuarios')->group(function () {
 
 Route::post('/reportes/pdf', [ReporteController::class, 'generarPDF'])->middleware('jwt.cookie');
 
+Route::middleware(['auth:api', 'jwt.cookie'])->group(function () {
+    Route::get('/configuracion', [ConfiguracionController::class, 'index']);
+    Route::put('/configuracion', [ConfiguracionController::class, 'update']);
+});
+
+Route::get('/ticket/pdf/{ticketId}', [TicketController::class, 'generarPDF']);
 

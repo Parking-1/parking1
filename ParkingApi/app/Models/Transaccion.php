@@ -16,19 +16,24 @@ class Transaccion extends Model
 
     protected $table = "transaccion";
 
-    // Agrega todos los campos que se van a llenar masivamente
     protected $fillable = [
         "nit",
         "id_vehiculo",
         "id_tarifa",
-        "id_espacio",       // <- agregar si lo estás usando
+        "id_espacio",
         "fecha_entrada",
         "fecha_salida",
         "precio_total",
-        "lavado"            // <- ¡importante!
+        "lavado"
     ];
 
     protected $hidden = ["created_at", "updated_at"];
+
+    // ✅ Esto es lo que faltaba
+    protected $casts = [
+        'fecha_entrada' => 'datetime',
+        'fecha_salida' => 'datetime',
+    ];
 
     public function vehiculo(): BelongsTo
     {
@@ -45,3 +50,4 @@ class Transaccion extends Model
         return $this->belongsTo(Espacio::class, "id_espacio");
     }
 }
+

@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class TransaccionController extends Controller
 {
@@ -57,9 +58,23 @@ class TransaccionController extends Controller
                 'lavado'        => $request->lavado ?? false,
             ]);
 
+             // 🔸 Cargar configuración de empresa
+            $config = \App\Models\Configuracion::first();
             DB::commit();
 
-            return response()->json(["data" => $transaccion], 201);
+            // 🔸 Generar PDF del ticket
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.ticket', [
+            'configuracion' => $config,
+            'ticket' => $transaccion,
+            ]);
+
+            // 🔸 Guardar el archivo en storage/app/public/tickets
+            $nombreArchivo = 'ticket_' . $transaccion->id . '.pdf';
+            \Illuminate\Support\Facades\Storage::put('public/tickets/' . $nombreArchivo, $pdf->output());
+
+            DB::commit();
+
+            return response()->json(["data" => $transaccion,"ticket_url" => asset('storage/tickets/' . $nombreArchivo)], 201);
         } catch (ModelNotFoundException $e) {
             return response()->json(["error" => "Vehículo no encontrado"], 404);
         } catch (QueryException $e) {
@@ -244,4 +259,55 @@ class TransaccionController extends Controller
 
         return $monto;
     }
+
+    use Illuminate\Support\Facades\Storage;
+use App\Models\Configuracion;
+
+public function registrarSalida($id)
+{
+    try {
+        $transaccion = Transaccion::with(['vehiculo', 'espacio', 'cliente'])->findOrFail($id);
+
+        // Calcular tiempo y monto
+        $salida = now();
+        $entrada = $transaccion->fecha_entrada;
+
+        $tarifa = $transaccion->tarifa; // Asegúrate de tener esta relación
+        $lavado = $transaccion->lavado ?? false;
+
+        $monto = $this->calcularPrecio($entrada, $salida, $tarifa, $lavado);
+
+        $transaccion->update([
+            'fecha_salida' => $salida,
+            'precio_total' => $monto,
+        ]);
+
+        $transaccion->espacio->update(['estado' => 'disponible']);
+
+        // Solo generar PDF si hay monto a cobrar
+        if ($monto > 0) {
+            $configuracion = Configuracion::first();
+
+            $pdf = Pdf::loadView('pdf.ticket_cobro', [
+                'transaccion'   => $transaccion,
+                'configuracion' => $configuracion,
+            ])->setPaper([0, 0, 165, 440], 'portrait'); // 58mm térmico
+
+            $filename = 'cobro_' . $transaccion->id . '_' . now()->format('Ymd_His') . '.pdf';
+            $path = 'tickets/' . $filename;
+
+            Storage::disk('public')->put($path, $pdf->output());
+
+            $transaccion->update(['ruta_pdf' => $path]);
+        }
+
+        return response()->json([
+            'message' => 'Salida registrada correctamente',
+            'ruta_pdf' => $transaccion->ruta_pdf ? asset('storage/' . $transaccion->ruta_pdf) : null
+        ]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+
 }

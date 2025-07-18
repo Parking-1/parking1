@@ -17,7 +17,8 @@ class EspacioFactory extends Factory
     public function definition()
     {
         return [
-            "descripcion" => fake()->unique()->regexify('[A-Z]{1}[0-9]{1}')
+            "descripcion" => fake()->unique()->regexify('[A-Z]{1}[0-9]{2}'),
+            'estado' => 'Disponible',
         ];
     }
 }

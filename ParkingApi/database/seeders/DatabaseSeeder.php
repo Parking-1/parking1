@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
             VehiculoSeeder::class,
             UserSeeder::class,
             TarifaSeeder::class,
+            ConfiguracionSeeder::class
         ]);
 
     }
