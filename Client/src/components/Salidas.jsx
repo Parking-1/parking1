@@ -60,7 +60,7 @@ const Salidas = () => {
 
   const cerrarTransaccion = async () => {
     try {
-      await axios.put(
+      const res = await axios.put(
         `/transaccion/${transaccion.id}/cerrar`,
         { lavado: transaccion.lavado },
         {
@@ -69,6 +69,22 @@ const Salidas = () => {
       );
 
       toast.success("✅ Salida registrada correctamente");
+
+      // 👇 Abrir e imprimir el PDF automáticamente
+      if (res.data.ruta_pdf) {
+        const printWindow = window.open(res.data.ruta_pdf, "_blank");
+        if (printWindow) {
+          printWindow.onload = () => {
+            printWindow.focus();
+            printWindow.print();
+          };
+        } else {
+          toast.warning(
+            "⚠️ No se pudo abrir el PDF para imprimir. Verifica el navegador."
+          );
+        }
+      }
+
       setTransaccion(null);
       setLavado(false);
       setPlacaBuscar("");

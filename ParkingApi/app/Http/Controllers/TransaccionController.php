@@ -15,6 +15,8 @@ use Exception;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Configuracion;
 
 class TransaccionController extends Controller
 {
@@ -62,6 +64,7 @@ class TransaccionController extends Controller
             $config = \App\Models\Configuracion::first();
             DB::commit();
 
+            $transaccion->load('vehiculo.tipoVehiculo');
             // 🔸 Generar PDF del ticket
             $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.ticket', [
             'configuracion' => $config,
@@ -185,7 +188,12 @@ class TransaccionController extends Controller
     public function CerrarTransaccion(Request $request, $id): JsonResponse
 {
     try {
-        $transaccion = Transaccion::with(['Vehiculo.TipoVehiculo.Tarifa', 'Espacio'])->findOrFail($id);
+        $transaccion = Transaccion::with([
+            'vehiculo.tipoVehiculo.tarifa',
+            'espacio',
+            'tarifa' // <- solo si existe esta relación
+        ])->findOrFail($id);
+
         $this->authorize('update', $transaccion);
 
         $lavado = filter_var($request->input('lavado', false), FILTER_VALIDATE_BOOLEAN);
@@ -193,7 +201,7 @@ class TransaccionController extends Controller
         DB::transaction(function () use ($transaccion, $lavado) {
             $entrada = Carbon::parse($transaccion->fecha_entrada);
             $salida = now();
-            $tarifa = $transaccion->Tarifa;
+            $tarifa = $transaccion->tarifa; // usa el nombre correcto de la relación
 
             $monto = $this->calcularPrecio($entrada, $salida, $tarifa, $lavado);
 
@@ -203,7 +211,7 @@ class TransaccionController extends Controller
                 'lavado'       => $lavado,
             ]);
 
-            $transaccion->Espacio->update(['estado' => 'disponible']);
+            $transaccion->espacio->update(['estado' => 'disponible']);
         });
 
         return response()->json(["message" => "Transacción cerrada correctamente"], 200);
@@ -213,6 +221,7 @@ class TransaccionController extends Controller
         return response()->json(["error" => $e->getMessage()], 500);
     }
 }
+
 
 
     public function GetBetween(Request $request): JsonResponse
@@ -260,13 +269,10 @@ class TransaccionController extends Controller
         return $monto;
     }
 
-    use Illuminate\Support\Facades\Storage;
-use App\Models\Configuracion;
-
 public function registrarSalida($id)
 {
     try {
-        $transaccion = Transaccion::with(['vehiculo', 'espacio', 'cliente'])->findOrFail($id);
+        $transaccion = Transaccion::with(['vehiculo.tipoVehiculo', 'espacio', 'cliente', 'tarifa'])->findOrFail($id);
 
         // Calcular tiempo y monto
         $salida = now();

@@ -41,9 +41,10 @@
     <div class="line"></div>
 
     <p><strong>Fecha:</strong> {{ $ticket->fecha_entrada->format('d/m/Y') }}</p>
-<p><strong>Hora:</strong> {{ $ticket->fecha_entrada->format('H:i') }}</p>
+    <p><strong>Hora:</strong> {{ $ticket->fecha_entrada->format('H:i') }}</p>
     <p><strong>Placa:</strong> {{ strtoupper($ticket->vehiculo->placa) }}</p>
-    <p><strong>Tipo:</strong> {{ ucfirst($ticket->vehiculo->tipo) }}</p>
+    <p><strong>Tipo:</strong> {{ ucfirst($ticket->vehiculo->tipoVehiculo->nombre) }}</p>
+
     <p><strong>Espacio:</strong> {{ $ticket->espacio->descripcion }}</p>
     <p><strong>Lavado:</strong> {{ $ticket->lavado ? 'Sí' : 'No' }}</p>
 

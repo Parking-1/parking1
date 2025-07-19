@@ -17,7 +17,7 @@
 
     <div class="datos">
         <p><strong>Placa:</strong> {{ $transaccion->vehiculo->placa }}</p>
-        <p><strong>Tipo:</strong> {{ $transaccion->vehiculo->tipo }}</p>
+        <p><strong>Tipo:</strong> {{ $transaccion->vehiculo->tipoVehiculo->descripcion ?? 'No definido' }}</p>
         <p><strong>Fecha Entrada:</strong> {{ \Carbon\Carbon::parse($transaccion->fecha_entrada)->format('d/m/Y H:i') }}</p>
         <p><strong>Fecha Salida:</strong> {{ \Carbon\Carbon::parse($transaccion->fecha_salida)->format('d/m/Y H:i') }}</p>
         <p><strong>Tarifa:</strong> ${{ number_format($transaccion->tarifa->precio, 0, ',', '.') }}</p>
