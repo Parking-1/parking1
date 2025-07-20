@@ -2,30 +2,61 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Comprobante de Cobro</title>
+    <title>Ticket de Cobro</title>
     <style>
-        body { font-family: Arial, sans-serif; font-size: 12px; }
-        h1 { text-align: center; }
-        .datos { margin: 10px 0; }
+        body {
+            font-family: sans-serif;
+            font-size: 14px;
+        }
+        .titulo {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .linea {
+            border-top: 1px dashed #000;
+            margin: 10px 0;
+        }
+        .dato {
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
-    <h1>{{ $configuracion->nombre_empresa ?? 'PARKING' }}</h1>
-    <p>NIT: {{ $configuracion->nit ?? 'N/A' }}</p>
-    <p>Dirección: {{ $configuracion->direccion ?? 'N/A' }}</p>
-    <hr>
 
-    <div class="datos">
-        <p><strong>Placa:</strong> {{ $transaccion->vehiculo->placa }}</p>
-        <p><strong>Tipo:</strong> {{ $transaccion->vehiculo->tipoVehiculo->descripcion ?? 'No definido' }}</p>
-        <p><strong>Fecha Entrada:</strong> {{ \Carbon\Carbon::parse($transaccion->fecha_entrada)->format('d/m/Y H:i') }}</p>
-        <p><strong>Fecha Salida:</strong> {{ \Carbon\Carbon::parse($transaccion->fecha_salida)->format('d/m/Y H:i') }}</p>
-        <p><strong>Tarifa:</strong> ${{ number_format($transaccion->tarifa->precio, 0, ',', '.') }}</p>
-        <p><strong>Lavado:</strong> {{ $transaccion->lavado ? 'Sí' : 'No' }}</p>
-        <p><strong>Total a Pagar:</strong> ${{ number_format($transaccion->precio_total, 0, ',', '.') }}</p>
+    <div class="titulo">{{ $configuracion->nombre_empresa ?? 'EMPRESA' }}</div>
+    <div class="dato">NIT: {{ $configuracion->nit ?? 'N/A' }}</div>
+    <div class="dato">Dirección: {{ $configuracion->direccion ?? 'N/A' }}</div>
+    <div class="dato">Teléfono: {{ $configuracion->telefono ?? 'N/A' }}</div>
+    <div class="dato">Resolución DIAN: {{ $configuracion->resolucion_dian ?? 'N/A' }}</div>
+
+    <div class="linea"></div>
+
+    <div class="dato"><strong>Placa:</strong> {{ $transaccion->vehiculo->placa ?? 'Desconocida' }}</div>
+    <div class="dato"><strong>Clase de Vehículo:</strong> {{ $transaccion->vehiculo->tipoVehiculo->descripcion ?? 'N/A' }}</div>
+
+    <div class="linea"></div>
+
+    <div class="dato"><strong>Fecha de Entrada:</strong> {{ $transaccion->fecha_ingreso->format('d/m/Y') }}</div>
+    <div class="dato"><strong>Hora de Entrada:</strong> {{ $transaccion->fecha_ingreso->format('H:i') }}</div>
+
+    <div class="dato"><strong>Fecha de Salida:</strong> {{ $transaccion->fecha_salida->format('d/m/Y') }}</div>
+    <div class="dato"><strong>Hora de Salida:</strong> {{ $transaccion->fecha_salida->format('H:i') }}</div>
+
+    <div class="linea"></div>
+
+    <div class="dato"><strong>Lavado:</strong> {{ $transaccion->lavado ? 'Sí' : 'No' }}</div>
+
+    <div class="dato">
+        <strong>Tiempo Estacionado:</strong>
+        {{ $transaccion->fecha_ingreso->diff($transaccion->fecha_salida)->format('%h horas %i minutos') }}
     </div>
 
-    <hr>
-    <p style="text-align: center;">Gracias por su visita</p>
+    <div class="dato"><strong>Total a Pagar:</strong> ${{ number_format($transaccion->precio_total, 0, ',', '.') }}</div>
+
+    <div class="linea"></div>
+
+    <div class="titulo">Gracias por su visita</div>
 </body>
 </html>
+

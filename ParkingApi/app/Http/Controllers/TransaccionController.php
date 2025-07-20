@@ -185,42 +185,39 @@ class TransaccionController extends Controller
         }
     }
 
-    public function CerrarTransaccion(Request $request, $id): JsonResponse
+    public function CerrarTransaccion(Request $request, $id)
 {
     try {
-        $transaccion = Transaccion::with([
-            'vehiculo.tipoVehiculo.tarifa',
-            'espacio',
-            'tarifa' // <- solo si existe esta relación
-        ])->findOrFail($id);
+        $salida = Carbon::now();
+        $transaccion = Transaccion::with('vehiculo.tipoVehiculo', 'tarifa', 'espacio')->findOrFail($id);
 
-        $this->authorize('update', $transaccion);
+        $minutos = $transaccion->fecha_ingreso->diffInMinutes($salida);
+        $tarifa = $transaccion->tarifa;
 
-        $lavado = filter_var($request->input('lavado', false), FILTER_VALIDATE_BOOLEAN);
+        $monto = ceil($minutos / $tarifa->minutos) * $tarifa->valor;
 
-        DB::transaction(function () use ($transaccion, $lavado) {
-            $entrada = Carbon::parse($transaccion->fecha_entrada);
-            $salida = now();
-            $tarifa = $transaccion->tarifa; // usa el nombre correcto de la relación
+        $lavado = $request->input('lavado') ? true : false;
+        if ($lavado && $transaccion->vehiculo->tipoVehiculo->valor_lavado) {
+            $monto += $transaccion->vehiculo->tipoVehiculo->valor_lavado;
+        }
 
-            $monto = $this->calcularPrecio($entrada, $salida, $tarifa, $lavado);
+        $transaccion->update([
+            'fecha_salida' => $salida,
+            'precio_total' => $monto,
+            'lavado' => $lavado,
+        ]);
 
-            $transaccion->update([
-                'fecha_salida' => $salida,
-                'precio_total' => $monto,
-                'lavado'       => $lavado,
-            ]);
+        $transaccion->espacio->update(['estado' => 'disponible']);
 
-            $transaccion->espacio->update(['estado' => 'disponible']);
-        });
+        // ✅ Refrescar transacción y cargar relaciones actualizadas
+        $transaccion->refresh()->load('vehiculo.tipoVehiculo', 'tarifa', 'espacio');
 
-        return response()->json(["message" => "Transacción cerrada correctamente"], 200);
-    } catch (ModelNotFoundException $e) {
-        return response()->json(["error" => "Transacción no encontrada"], 404);
-    } catch (Exception $e) {
-        return response()->json(["error" => $e->getMessage()], 500);
+        return response()->json(['message' => 'Transacción cerrada correctamente', 'transaccion' => $transaccion]);
+    } catch (\Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
     }
 }
+
 
 
 
@@ -269,51 +266,76 @@ class TransaccionController extends Controller
         return $monto;
     }
 
-public function registrarSalida($id)
+public function registrarSalida(Request $request, $id)
 {
     try {
-        $transaccion = Transaccion::with(['vehiculo.tipoVehiculo', 'espacio', 'cliente', 'tarifa'])->findOrFail($id);
+        $salida = Carbon::now();
 
-        // Calcular tiempo y monto
-        $salida = now();
-        $entrada = $transaccion->fecha_entrada;
+        $transaccion = Transaccion::with('vehiculo.tipoVehiculo', 'tarifa', 'espacio')->findOrFail($id);
 
-        $tarifa = $transaccion->tarifa; // Asegúrate de tener esta relación
-        $lavado = $transaccion->lavado ?? false;
+        // Validar que tiene fecha_ingreso
+        if (!$transaccion->fecha_ingreso) {
+            return response()->json(['error' => 'La transacción no tiene fecha de ingreso'], 400);
+        }
 
-        $monto = $this->calcularPrecio($entrada, $salida, $tarifa, $lavado);
+        $minutos = Carbon::parse($transaccion->fecha_ingreso)->diffInMinutes($salida);
+        $tarifa = $transaccion->tarifa;
 
+        // Calcular el monto base según la tarifa
+        $monto = 0;
+        if ($tarifa && $tarifa->minutos > 0) {
+            $monto = ceil($minutos / $tarifa->minutos) * $tarifa->valor;
+        }
+
+        // Verificar si se aplica el lavado
+        $lavado = $request->input('lavado') ? true : false;
+        $valorLavado = 0;
+        if ($lavado && $transaccion->vehiculo && $transaccion->vehiculo->tipoVehiculo) {
+            $valorLavado = $transaccion->vehiculo->tipoVehiculo->valor_lavado ?? 0;
+            $monto += $valorLavado;
+        }
+
+        // Actualizar la transacción
         $transaccion->update([
             'fecha_salida' => $salida,
             'precio_total' => $monto,
+            'lavado' => $lavado,
         ]);
 
+        // Liberar el espacio
         $transaccion->espacio->update(['estado' => 'disponible']);
 
-        // Solo generar PDF si hay monto a cobrar
-        if ($monto > 0) {
-            $configuracion = Configuracion::first();
+        // Refrescar relaciones
+        $transaccion->refresh()->load('vehiculo.tipoVehiculo', 'tarifa', 'espacio');
 
-            $pdf = Pdf::loadView('pdf.ticket_cobro', [
-                'transaccion'   => $transaccion,
-                'configuracion' => $configuracion,
-            ])->setPaper([0, 0, 165, 440], 'portrait'); // 58mm térmico
+        // Obtener configuración
+        $config = Configuracion::first();
 
-            $filename = 'cobro_' . $transaccion->id . '_' . now()->format('Ymd_His') . '.pdf';
-            $path = 'tickets/' . $filename;
+        // Generar PDF
+        $pdf = Pdf::loadView('pdf.ticket_cobro', [
+            'configuracion' => $config,
+            'transaccion' => $transaccion,
+        ]);
 
-            Storage::disk('public')->put($path, $pdf->output());
+        $nombreArchivo = 'ticket_cobro_' . now()->format('Ymd_His') . '.pdf';
+        $rutaArchivo = 'tickets_cobro/' . $nombreArchivo;
 
-            $transaccion->update(['ruta_pdf' => $path]);
-        }
+        Storage::disk('public')->put($rutaArchivo, $pdf->output());
+
+        // Guardar la ruta del PDF
+        $transaccion->update(['pdf' => $rutaArchivo]);
 
         return response()->json([
             'message' => 'Salida registrada correctamente',
-            'ruta_pdf' => $transaccion->ruta_pdf ? asset('storage/' . $transaccion->ruta_pdf) : null
+            'transaccion' => $transaccion,
+            'monto_total' => $monto,
+            'valor_lavado' => $valorLavado,
+            'minutos' => $minutos
         ]);
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()], 500);
     }
 }
+
 
 }

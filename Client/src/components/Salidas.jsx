@@ -62,17 +62,23 @@ const Salidas = () => {
     try {
       const res = await axios.put(
         `/transaccion/${transaccion.id}/cerrar`,
-        { lavado: transaccion.lavado },
+        { lavado },
         {
           withCredentials: true,
         }
       );
 
+      const nuevaTransaccion = res.data.transaccion;
+      setTransaccion(nuevaTransaccion);
+
       toast.success("✅ Salida registrada correctamente");
 
       // 👇 Abrir e imprimir el PDF automáticamente
-      if (res.data.ruta_pdf) {
-        const printWindow = window.open(res.data.ruta_pdf, "_blank");
+      if (nuevaTransaccion.pdf) {
+        const printWindow = window.open(
+          `/storage/${nuevaTransaccion.pdf}`,
+          "_blank"
+        );
         if (printWindow) {
           printWindow.onload = () => {
             printWindow.focus();
@@ -85,11 +91,10 @@ const Salidas = () => {
         }
       }
 
-      setTransaccion(null);
-      setLavado(false);
+      // Limpiar placa si deseas buscar otra
       setPlacaBuscar("");
-      await buscarTransaccion();
     } catch (error) {
+      console.error(error);
       toast.error("❌ Error al cerrar la transacción");
     }
   };
