@@ -14,9 +14,9 @@ const Ingresos = () => {
 
   const tipoToId = (tipo) => {
     switch (tipo) {
-      case "auto":
-        return 1;
       case "moto":
+        return 1;
+      case "auto":
         return 2;
       case "camion":
         return 3;
@@ -44,7 +44,7 @@ const Ingresos = () => {
         "/vehiculo/first-or-create",
         {
           placa,
-          id_tipo_vehiculo: tipoToId(tipo),
+          id_tipo_vehiculo: tipoToId(tipo.toLowerCase()),
         },
         { withCredentials: true }
       );
@@ -170,8 +170,8 @@ const Ingresos = () => {
               className="w-full h-12 px-4 py-2 rounded-lg border border-gray-300 mb-4"
               required
             >
-              <option value="auto">Auto</option>
               <option value="moto">Moto</option>
+              <option value="auto">Auto</option>
               <option value="camion">Camión</option>
               <option value="bus">Bus</option>
             </select>

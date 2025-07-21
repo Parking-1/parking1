@@ -61,7 +61,7 @@ const Salidas = () => {
   const cerrarTransaccion = async () => {
     try {
       const res = await axios.put(
-        `/transaccion/${transaccion.id}/cerrar`,
+        `/transaccion/${transaccion.id}/salida`,
         { lavado },
         {
           withCredentials: true,
@@ -193,7 +193,7 @@ const Salidas = () => {
                   </div>
                   <div>
                     <strong>Clase de Vehículo:</strong>{" "}
-                    {transaccion.vehiculo.tipo_vehiculo.descripcion}
+                    {transaccion.vehiculo?.tipo_vehiculo?.descripcion ?? "N/A"}
                   </div>
                   <div>
                     <strong>Cobro por Lavado:</strong>{" "}

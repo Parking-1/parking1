@@ -22,21 +22,23 @@ class TransaccionController extends Controller
 {
     public function Save(Request $request): JsonResponse
     {
+        $request->validate([
+            'placa' => 'required|string|max:10',
+            'id_tipo_vehiculo' => 'required|exists:tipo_vehiculo,id',
+            'lavado' => 'nullable|boolean',
+        ]);
 
         try {
             $vehiculo = Vehiculo::firstOrCreate(
-            ['placa' => strtoupper($request->placa)],
-            ['id_tipo_vehiculo' => $request->id_tipo_vehiculo]
-        );
+                ['placa' => strtoupper($request->placa)],
+                ['id_tipo_vehiculo' => $request->id_tipo_vehiculo]
+            );
 
-        // Validar tipo de vehículo existente si ya está registrado
-        if ($vehiculo->wasRecentlyCreated === false && $vehiculo->id_tipo_vehiculo !== $request->id_tipo_vehiculo) {
-            return response()->json([
-                "error" => "Ya existe un vehículo con esta placa y con un tipo diferente."
-            ], 400);
-        }
+            if (!$vehiculo->wasRecentlyCreated && $vehiculo->id_tipo_vehiculo !== $request->id_tipo_vehiculo) {
+                return response()->json(["error" => "Ya existe un vehículo con esta placa y con un tipo diferente."], 400);
+            }
 
-        $this->authorize('create', Transaccion::class);
+            $this->authorize('create', Transaccion::class);
 
             $espacio = Espacio::where('estado', 'disponible')->first();
             if (!$espacio) {
@@ -60,29 +62,28 @@ class TransaccionController extends Controller
                 'lavado'        => $request->lavado ?? false,
             ]);
 
-             // 🔸 Cargar configuración de empresa
-            $config = \App\Models\Configuracion::first();
-            DB::commit();
+            //$transaccion = Transaccion::with('vehiculo.tipoVehiculo', 'espacio')->findOrFail($id);
 
-            $transaccion->load('vehiculo.tipoVehiculo');
-            // 🔸 Generar PDF del ticket
-            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('pdf.ticket', [
-            'configuracion' => $config,
-            'ticket' => $transaccion,
+            $config = Configuracion::first();
+
+            $transaccion->load(['vehiculo.tipoVehiculo', 'tarifa', 'espacio']);
+
+            $pdf = Pdf::loadView('pdf.ticket', [
+                'configuracion' => $config,
+                'ticket' => $transaccion,
             ]);
 
-            // 🔸 Guardar el archivo en storage/app/public/tickets
             $nombreArchivo = 'ticket_' . $transaccion->id . '.pdf';
-            \Illuminate\Support\Facades\Storage::put('public/tickets/' . $nombreArchivo, $pdf->output());
+            Storage::disk('public')->put('tickets/' . $nombreArchivo, $pdf->output());
 
             DB::commit();
 
-            return response()->json(["data" => $transaccion,"ticket_url" => asset('storage/tickets/' . $nombreArchivo)], 201);
+            return response()->json([
+                "data" => $transaccion,
+                "ticket_url" => asset('storage/tickets/' . $nombreArchivo)
+            ], 201);
         } catch (ModelNotFoundException $e) {
             return response()->json(["error" => "Vehículo no encontrado"], 404);
-        } catch (QueryException $e) {
-            DB::rollBack();
-            return response()->json(["error" => $e->getMessage()], 500);
         } catch (Exception $e) {
             DB::rollBack();
             return response()->json(["error" => $e->getMessage()], 500);
@@ -185,7 +186,7 @@ class TransaccionController extends Controller
         }
     }
 
-    public function CerrarTransaccion(Request $request, $id)
+    /*public function CerrarTransaccion(Request $request, $id)
 {
     try {
         $salida = Carbon::now();
@@ -216,7 +217,7 @@ class TransaccionController extends Controller
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()], 500);
     }
-}
+}*/
 
 
 
@@ -257,6 +258,11 @@ class TransaccionController extends Controller
                 $meses = max(1, $entrada->diffInMonths($salida));
                 $monto = $meses * $tarifa->precio_base;
                 break;
+            default:
+                if ($tarifa->minutos > 0) {
+                    $monto = ceil($entrada->diffInMinutes($salida) / $tarifa->minutos) * $tarifa->valor;
+                }
+                break;
         }
 
         if ($lavado && isset($tarifa->precio_lavado)) {
@@ -266,76 +272,85 @@ class TransaccionController extends Controller
         return $monto;
     }
 
-public function registrarSalida(Request $request, $id)
+    private function calcularDuracionTexto(Carbon $entrada, Carbon $salida): string
 {
-    try {
-        $salida = Carbon::now();
+    $diff = $entrada->diff($salida);
 
-        $transaccion = Transaccion::with('vehiculo.tipoVehiculo', 'tarifa', 'espacio')->findOrFail($id);
+    $horas = $diff->h + ($diff->days * 24);
+    $minutos = $diff->i;
 
-        // Validar que tiene fecha_ingreso
-        if (!$transaccion->fecha_ingreso) {
-            return response()->json(['error' => 'La transacción no tiene fecha de ingreso'], 400);
-        }
+    $texto = [];
 
-        $minutos = Carbon::parse($transaccion->fecha_ingreso)->diffInMinutes($salida);
-        $tarifa = $transaccion->tarifa;
-
-        // Calcular el monto base según la tarifa
-        $monto = 0;
-        if ($tarifa && $tarifa->minutos > 0) {
-            $monto = ceil($minutos / $tarifa->minutos) * $tarifa->valor;
-        }
-
-        // Verificar si se aplica el lavado
-        $lavado = $request->input('lavado') ? true : false;
-        $valorLavado = 0;
-        if ($lavado && $transaccion->vehiculo && $transaccion->vehiculo->tipoVehiculo) {
-            $valorLavado = $transaccion->vehiculo->tipoVehiculo->valor_lavado ?? 0;
-            $monto += $valorLavado;
-        }
-
-        // Actualizar la transacción
-        $transaccion->update([
-            'fecha_salida' => $salida,
-            'precio_total' => $monto,
-            'lavado' => $lavado,
-        ]);
-
-        // Liberar el espacio
-        $transaccion->espacio->update(['estado' => 'disponible']);
-
-        // Refrescar relaciones
-        $transaccion->refresh()->load('vehiculo.tipoVehiculo', 'tarifa', 'espacio');
-
-        // Obtener configuración
-        $config = Configuracion::first();
-
-        // Generar PDF
-        $pdf = Pdf::loadView('pdf.ticket_cobro', [
-            'configuracion' => $config,
-            'transaccion' => $transaccion,
-        ]);
-
-        $nombreArchivo = 'ticket_cobro_' . now()->format('Ymd_His') . '.pdf';
-        $rutaArchivo = 'tickets_cobro/' . $nombreArchivo;
-
-        Storage::disk('public')->put($rutaArchivo, $pdf->output());
-
-        // Guardar la ruta del PDF
-        $transaccion->update(['pdf' => $rutaArchivo]);
-
-        return response()->json([
-            'message' => 'Salida registrada correctamente',
-            'transaccion' => $transaccion,
-            'monto_total' => $monto,
-            'valor_lavado' => $valorLavado,
-            'minutos' => $minutos
-        ]);
-    } catch (\Exception $e) {
-        return response()->json(['error' => $e->getMessage()], 500);
+    if ($horas > 0) {
+        $texto[] = $horas . ' hora' . ($horas > 1 ? 's' : '');
     }
+
+    if ($minutos > 0 || empty($texto)) {
+        $texto[] = $minutos . ' minuto' . ($minutos > 1 ? 's' : '');
+    }
+
+    return implode(' ', $texto);
 }
+
+
+    public function registrarSalida(Request $request, $id)
+    {
+        try {
+            $salida = Carbon::now();
+
+            $transaccion = Transaccion::with('vehiculo.tipoVehiculo', 'tarifa', 'espacio')->findOrFail($id);
+            $this->authorize('update', $transaccion);
+
+            if (!$transaccion->fecha_entrada) {
+                return response()->json(['error' => 'La transacción no tiene fecha de entrada'], 400);
+            }
+
+            $lavado = $request->input('lavado') ? true : false;
+            $monto = $this->calcularPrecio($transaccion->fecha_entrada, $salida, $transaccion->tarifa, $lavado);
+
+            DB::beginTransaction();
+
+            $transaccion->update([
+                'fecha_salida' => $salida,
+                'precio_total' => $monto,
+                'lavado' => $lavado,
+            ]);
+
+            $transaccion->espacio->update(['estado' => 'disponible']);
+            $transaccion->refresh()->load('vehiculo.tipoVehiculo', 'tarifa', 'espacio');
+
+            $config = Configuracion::first();
+
+            $tiempo = $this->calcularDuracionTexto($transaccion->fecha_entrada, $transaccion->fecha_salida);
+
+            $transaccion->load('vehiculo.tipoVehiculo');
+
+            $pdf = Pdf::loadView('pdf.ticket_cobro', [
+                'configuracion' => $config,
+                'transaccion' => $transaccion,
+                'tiempo' => $tiempo,
+            ]);
+
+            $nombreArchivo = 'ticket_cobro_' . now()->format('Ymd_His') . '.pdf';
+            $rutaArchivo = 'tickets_cobro/' . $nombreArchivo;
+            Storage::disk('public')->put($rutaArchivo, $pdf->output());
+
+            $transaccion->update(['pdf' => $rutaArchivo]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Salida registrada correctamente',
+                'transaccion' => $transaccion,
+                'monto_total' => $monto,
+                'minutos' => $transaccion->fecha_entrada->diffInMinutes($salida),
+                'ticket_url' => asset('storage/' . $rutaArchivo),
+            ]);
+        } catch (Exception $e) {
+            DB::rollBack();
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 
 
 }

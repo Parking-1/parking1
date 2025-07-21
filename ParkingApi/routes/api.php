@@ -48,7 +48,7 @@ Route::middleware(['jwt.cookie', 'is.admin'])->group(function () {
 // Rutas de transacciones
 Route::prefix("transaccion")->middleware('jwt.cookie')->group(function () {
     Route::post("/", [TransaccionController::class, "Save"]);
-    Route::put("/{id}/cerrar", [TransaccionController::class, "CerrarTransaccion"]);
+    Route::put("/{id}/salida", [TransaccionController::class, 'registrarSalida']);
 
     Route::get("/", [TransaccionController::class, "GetPaginate"]);
     Route::get("/{id}", [TransaccionController::class, "GetById"]);

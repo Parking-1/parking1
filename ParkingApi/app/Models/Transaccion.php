@@ -19,6 +19,7 @@ class Transaccion extends Model
     protected $fillable = [
         "nit",
         "id_vehiculo",
+        "id_tipo_vehiculo",
         "id_tarifa",
         "id_espacio",
         "fecha_entrada",
@@ -42,12 +43,18 @@ class Transaccion extends Model
 
     public function tarifa(): BelongsTo
     {
-        return $this->belongsTo(Tarifa::class, "id_tarifa");
+        return $this->belongsTo(Tarifa::class, "tarifa_id");
     }
 
     public function espacio(): BelongsTo
     {
         return $this->belongsTo(Espacio::class, "id_espacio");
     }
+
+    public function tipoVehiculo(): BelongsTo
+{
+    return $this->belongsTo(TipoVehiculo::class, "id_tipo_vehiculo"); // corregido aquí también
+}
+
 }
 

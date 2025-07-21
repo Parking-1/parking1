@@ -2,61 +2,65 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Ticket de Cobro</title>
+    <title>Ticket de Salida</title>
     <style>
         body {
-            font-family: sans-serif;
-            font-size: 14px;
-        }
-        .titulo {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 10px;
+            width: 100%;
             text-align: center;
+        }
+
+        .title {
+            font-size: 14px;
             font-weight: bold;
-            margin-bottom: 10px;
+            margin-bottom: 4px;
         }
-        .linea {
+
+        .line {
             border-top: 1px dashed #000;
-            margin: 10px 0;
+            margin: 6px 0;
         }
-        .dato {
-            margin: 5px 0;
+
+        .content p {
+            margin: 2px 0;
+        }
+
+        .footer {
+            margin-top: 6px;
+            font-size: 9px;
         }
     </style>
 </head>
 <body>
+    <div class="title">{{ strtoupper($configuracion->nombre_empresa) }}</div>
+    <p>NIT: {{ $configuracion->nit }}</p>
+    <p>{{ $configuracion->direccion }}</p>
+    <p>Tel: {{ $configuracion->telefono }}</p>
 
-    <div class="titulo">{{ $configuracion->nombre_empresa ?? 'EMPRESA' }}</div>
-    <div class="dato">NIT: {{ $configuracion->nit ?? 'N/A' }}</div>
-    <div class="dato">Dirección: {{ $configuracion->direccion ?? 'N/A' }}</div>
-    <div class="dato">Teléfono: {{ $configuracion->telefono ?? 'N/A' }}</div>
-    <div class="dato">Resolución DIAN: {{ $configuracion->resolucion_dian ?? 'N/A' }}</div>
+    <div class="line"></div>
 
-    <div class="linea"></div>
+    <p><strong>Placa:</strong> {{ strtoupper($transaccion->vehiculo->placa) }}</p>
+    <p><strong>Tipo:</strong> {{ $transaccion->vehiculo->tipo_vehiculo->nombre ?? 'No especificado' }}</p>
 
-    <div class="dato"><strong>Placa:</strong> {{ $transaccion->vehiculo->placa ?? 'Desconocida' }}</div>
-    <div class="dato"><strong>Clase de Vehículo:</strong> {{ $transaccion->vehiculo->tipoVehiculo->descripcion ?? 'N/A' }}</div>
+    <p><strong>Fecha Entrada:</strong> {{ optional($transaccion->fecha_entrada)->format('d/m/Y H:i') }}</p>
+    <p><strong>Fecha Salida:</strong> {{ optional($transaccion->fecha_salida)->format('d/m/Y H:i') }}</p>
 
-    <div class="linea"></div>
+    <p><strong>Tiempo:</strong> {{ $tiempo }}</p>
 
-    <div class="dato"><strong>Fecha de Entrada:</strong> {{ $transaccion->fecha_ingreso->format('d/m/Y') }}</div>
-    <div class="dato"><strong>Hora de Entrada:</strong> {{ $transaccion->fecha_ingreso->format('H:i') }}</div>
+    <p><strong>Total a Pagar:</strong> ${{ number_format($transaccion->precio_total, 0, ',', '.') }}</p>
 
-    <div class="dato"><strong>Fecha de Salida:</strong> {{ $transaccion->fecha_salida->format('d/m/Y') }}</div>
-    <div class="dato"><strong>Hora de Salida:</strong> {{ $transaccion->fecha_salida->format('H:i') }}</div>
+    <p><strong>Lavado:</strong> {{ $transaccion->lavado ? 'Sí' : 'No' }}</p>
 
-    <div class="linea"></div>
+    <div class="line"></div>
 
-    <div class="dato"><strong>Lavado:</strong> {{ $transaccion->lavado ? 'Sí' : 'No' }}</div>
-
-    <div class="dato">
-        <strong>Tiempo Estacionado:</strong>
-        {{ $transaccion->fecha_ingreso->diff($transaccion->fecha_salida)->format('%h horas %i minutos') }}
+    <div class="footer">
+        <p>{{ $configuracion->leyenda }}</p>
+        <p>Gracias por su visita</p>
     </div>
-
-    <div class="dato"><strong>Total a Pagar:</strong> ${{ number_format($transaccion->precio_total, 0, ',', '.') }}</div>
-
-    <div class="linea"></div>
-
-    <div class="titulo">Gracias por su visita</div>
 </body>
 </html>
+
+
+
 
