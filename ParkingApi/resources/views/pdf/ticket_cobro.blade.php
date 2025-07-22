@@ -41,7 +41,7 @@
     <div class="line"></div>
 
     <p><strong>Placa:</strong> {{ strtoupper($transaccion->vehiculo->placa) }}</p>
-    <p><strong>Tipo:</strong> {{ $transaccion->vehiculo->tipo_vehiculo->nombre ?? 'No especificado' }}</p>
+    <p><strong>Tipo:</strong> {{ $transaccion->vehiculo->tipoVehiculo->descripcion ?? 'No especificado' }}</p>
 
     <p><strong>Fecha Entrada:</strong> {{ optional($transaccion->fecha_entrada)->format('d/m/Y H:i') }}</p>
     <p><strong>Fecha Salida:</strong> {{ optional($transaccion->fecha_salida)->format('d/m/Y H:i') }}</p>

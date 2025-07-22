@@ -2,6 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const Reportes = () => {
   const [tipoReporte, setTipoReporte] = useState("");
@@ -11,7 +13,7 @@ const Reportes = () => {
 
   const handleClick = async (tipo) => {
     if (!fechaInicio || !fechaFinal) {
-      alert("Por favor selecciona ambas fechas.");
+      toast.warn("⚠️ Por favor selecciona ambas fechas.");
       return;
     }
 
@@ -26,7 +28,7 @@ const Reportes = () => {
       setResultados(res.data.data);
     } catch (error) {
       console.error("Error generando reporte:", error);
-      alert("Ocurrió un error al generar el reporte.");
+      toast.error("❌ Ocurrió un error al generar el reporte.");
     }
   };
 
@@ -145,7 +147,9 @@ const Reportes = () => {
   };
   const handleExportarPDF = async () => {
     if (!fechaInicio || !fechaFinal || !tipoReporte) {
-      alert("Selecciona fechas y tipo de reporte antes de exportar.");
+      toast.warning(
+        "⚠️ Selecciona fechas y tipo de reporte antes de exportar."
+      );
       return;
     }
 
@@ -174,7 +178,7 @@ const Reportes = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error("Error al exportar PDF:", error);
-      alert("Error al generar el PDF.");
+      toast.error("❌ Error al generar el PDF.");
     }
   };
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 use App\Models\Vehiculo;
 use App\Models\Tarifa;
@@ -22,9 +23,10 @@ class TipoVehiculo extends Model
         return $this->hasMany(Vehiculo::class, "id_tipo_vehiculo");
     }
 
-    public function tarifa(): HasMany
+    public function tarifa(): HasOne
     {
-        return $this->hasMany(Tarifa::class, "id_tipo_vehiculo");
+        return $this->hasOne(Tarifa::class, "id_tipo_vehiculo");
     }
 }
+
 

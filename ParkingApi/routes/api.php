@@ -10,6 +10,7 @@ use App\Http\Controllers\MovimientoCajaController;
 use App\Http\Controllers\PlanAbonadoController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ParqueaderoController;
 
 // Rutas de vehículos
 Route::prefix("vehiculo")->middleware('jwt.cookie')->group(function () {
@@ -127,3 +128,5 @@ Route::middleware(['auth:api', 'jwt.cookie'])->group(function () {
 
 Route::get('/ticket/pdf/{ticketId}', [TicketController::class, 'generarPDF']);
 
+// routes/api.php
+Route::get('/parqueadero/resumen', [ParqueaderoController::class, 'resumen']);

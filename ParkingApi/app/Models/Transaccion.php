@@ -43,7 +43,7 @@ class Transaccion extends Model
 
     public function tarifa(): BelongsTo
     {
-        return $this->belongsTo(Tarifa::class, "tarifa_id");
+        return $this->belongsTo(Tarifa::class, "id_tarifa");
     }
 
     public function espacio(): BelongsTo

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import axios from "../config/axios-instance.jsx";
+import ResumenParqueadero from "./ResumenParqueadero.jsx";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import { ToastContainer, toast } from "react-toastify";
@@ -9,6 +10,7 @@ import duration from "dayjs/plugin/duration";
 dayjs.extend(duration);
 
 const Salidas = () => {
+  const resumenRef = useRef(); // 👉 Referencia al resumen
   const [placaBuscar, setPlacaBuscar] = useState("");
   const [ticket, setTicket] = useState("");
   const [lavado, setLavado] = useState(false);
@@ -89,10 +91,15 @@ const Salidas = () => {
             "⚠️ No se pudo abrir el PDF para imprimir. Verifica el navegador."
           );
         }
+        resumenRef.current?.refetch();
       }
 
       // Limpiar placa si deseas buscar otra
       setPlacaBuscar("");
+      setTicket("");
+      setTransaccion(null);
+      setLavado(false);
+      setError("");
     } catch (error) {
       console.error(error);
       toast.error("❌ Error al cerrar la transacción");
@@ -117,6 +124,7 @@ const Salidas = () => {
       <div className="flex">
         <Sidebar />
         <div className="flex flex-col justify-center items-center mx-auto my-12 w-full">
+          <ResumenParqueadero ref={resumenRef} />
           <div className="flex flex-col md:flex-row w-full max-w-5xl p-4">
             {/* Columna de búsqueda */}
             <div className="md:w-1/3 pr-4">
@@ -197,7 +205,9 @@ const Salidas = () => {
                   </div>
                   <div>
                     <strong>Cobro por Lavado:</strong>{" "}
-                    {lavado ? `$${transaccion.tarifa.precio_lavado}` : "$0"}
+                    {lavado
+                      ? `$${transaccion.tarifa?.precio_lavado ?? "N/A"}`
+                      : "$0"}
                   </div>
                   <div>
                     <strong>Tiempo Transcurrido:</strong> {calcularTiempo()}
