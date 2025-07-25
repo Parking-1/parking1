@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use App\Models\Cliente;
 use App\Models\PlanAbonado;
 use App\Models\Vehiculo;
+use App\Models\Configuracion;
 use Illuminate\Database\QueryException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Exception;
@@ -145,11 +146,13 @@ class ClienteController extends Controller
                     throw new Exception('Este cliente ya tiene un plan activo.');
                 }
 
+                $vehiculoId = null;
                 if ($request->filled('placa')) {
-                    $cliente->vehiculo()->firstOrCreate([
+                    $vehiculo = $cliente->vehiculo()->firstOrCreate([
                         'placa'            => strtoupper($request->placa),
                         'id_tipo_vehiculo' => $request->id_tipo_vehiculo ?? 1,
                     ]);
+                    $vehiculoId = $vehiculo->id;
                 }
 
                 $fechaFin = Carbon::parse($request->fecha_inicio)->addDays($request->duracion);
@@ -161,8 +164,22 @@ class ClienteController extends Controller
                     'total'        => $request->total,
                     'fecha_inicio' => $request->fecha_inicio,
                     'fecha_fin'    => $fechaFin,
-                    'vehiculo_id'  => $vehiculo?->id, // ✅ aquí se guarda el ID
+                    'vehiculo_id'  => $vehiculoId, // ✅ aquí se guarda el ID
                 ]);
+
+                // Restar espacio disponible
+                $config = Configuracion::first();
+
+                 // ✅ Agrega esta validación justo aquí:
+    if ($config && $config->espacios_disponibles <= 0) {
+        throw new \Exception('No hay espacios disponibles para asignar este plan.');
+    }
+
+    
+                if ($config && $config->espacios_disponibles > 0) {
+                    $config->espacios_disponibles -= 1;
+                    $config->save();
+                }
             });
 
             return response()->json(['message' => 'Plan del abonado guardado'], 201);
@@ -172,22 +189,28 @@ class ClienteController extends Controller
     }
 
     public function tienePlanActivo($id): JsonResponse
-    {
-        try {
-            $cliente = Cliente::with(['planes' => function ($q) {
-                $q->whereDate('fecha_fin', '>=', now());
-            }])->findOrFail($id);
+{
+    try {
+        $cliente = Cliente::with(['planes' => function ($q) {
+            $q->whereDate('fecha_fin', '>=', now())
+              ->orderBy('fecha_fin', 'asc');
+        }])->findOrFail($id);
 
-            $activo = $cliente->planes->isNotEmpty();
+        $activo = $cliente->planes->isNotEmpty();
+        $vigenteHasta = $activo ? $cliente->planes->first()->fecha_fin : null;
 
-            return response()->json([
-                'activo' => $activo,
-                'vigente_hasta' => $activo ? $cliente->planes->first()->fecha_fin : null,
-            ]);
-        } catch (Exception $e) {
-            return response()->json(["error" => $e->getMessage()], 500);
-        }
+        return response()->json([
+            'activo' => $activo,
+            'vigente_hasta' => $vigenteHasta,
+        ]);
+
+    } catch (ModelNotFoundException $e) {
+        return response()->json(["error" => "Cliente no encontrado"], 404);
+    } catch (Exception $e) {
+        return response()->json(["error" => $e->getMessage()], 500);
     }
+}
+
 
     public function update(Request $request, $id)
     {
@@ -275,5 +298,56 @@ class ClienteController extends Controller
 
         return response()->json(['data' => $query->orderByDesc('fecha_inicio')->get()]);
     }
+
+    public function getPlanesPorCliente($clienteId): JsonResponse
+{
+    try {
+        $planes = PlanAbonado::where('cliente_id', $clienteId)
+            ->with('vehiculo')
+            ->orderByDesc('fecha_inicio')
+            ->get();
+
+        return response()->json(['data' => $planes], 200);
+    } catch (Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+
+public function getPlanes(): JsonResponse
+{
+    try {
+        $planes = PlanAbonado::with('cliente', 'vehiculo')
+            ->orderByDesc('fecha_inicio')
+            ->get();
+
+        return response()->json(['data' => $planes], 200);
+    } catch (Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+
+
+public function eliminarPlan($id): JsonResponse
+{
+    try {
+        DB::transaction(function () use ($id) {
+            $plan = PlanAbonado::findOrFail($id);
+            $plan->delete();
+
+            // Sumar espacio disponible
+            $config = Configuracion::first();
+            $config->espacios_disponibles += 1;
+            $config->save();
+        });
+
+        return response()->json(['message' => 'Plan eliminado correctamente']);
+    } catch (ModelNotFoundException $e) {
+        return response()->json(['error' => 'Plan no encontrado'], 404);
+    } catch (Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
+    }
+}
+
+
 }
 

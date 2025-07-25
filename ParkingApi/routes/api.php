@@ -80,15 +80,15 @@ Route::post("/cliente/abonado-plan", [ClienteController::class, "SavePlanAbonado
 
 Route::get('/cliente/{id}/plan-activo', [ClienteController::class, 'tienePlanActivo']);
 
-Route::get('/planes-abonado/{clienteId}', [PlanAbonadoController::class, 'getByCliente']);
-Route::delete('/planes-abonado/{id}', [PlanAbonadoController::class, 'destroy']);
+//Route::get('/planes-abonado/{clienteId}', [PlanAbonadoController::class, 'getByCliente']);
+//Route::delete('/planes-abonado/{id}', [PlanAbonadoController::class, 'destroy']);
 
-Route::put('/planes-abonado/{id}', [PlanAbonadoController::class, 'update']);
+//Route::put('/planes-abonado/{id}', [PlanAbonadoController::class, 'update']);
 
 Route::post('/caja', [MovimientoCajaController::class, 'store']);
 Route::get('/caja', [MovimientoCajaController::class, 'index']);
 
-Route::get('/planes-abonado', [PlanAbonadoController::class, 'getByCliente']);
+//Route::get('/planes-abonado', [PlanAbonadoController::class, 'getByCliente']);
 
 Route::get('/cliente/plan-abonado/buscar', [ClienteController::class, 'buscarPlanPorCodigo']);
 
@@ -130,3 +130,8 @@ Route::get('/ticket/pdf/{ticketId}', [TicketController::class, 'generarPDF']);
 
 // routes/api.php
 Route::get('/parqueadero/resumen', [ParqueaderoController::class, 'resumen']);
+
+Route::get('/planes-abonado/{clienteId}', [ClienteController::class, 'getPlanesPorCliente']);
+Route::get('/planes-abonado', [ClienteController::class, 'getPlanes']); // todos los planes
+Route::put('/planes-abonado/{id}', [ClienteController::class, 'actualizarPlan']);
+Route::delete('/planes-abonado/{id}', [ClienteController::class, 'eliminarPlan']);

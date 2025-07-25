@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Cliente;
 use App\Models\Transaccion;
 use App\Models\TipoVehiculo;
+use App\Models\PlanAbonado;
 
 class Vehiculo extends Model
 {
@@ -34,6 +35,11 @@ class Vehiculo extends Model
     public function transacciones(): HasMany
     {
         return $this->hasMany(Transaccion::class, "id_vehiculo");
+    }
+
+    public function planes(): HasMany
+    {
+        return $this->hasMany(PlanAbonado::class, 'vehiculo_id');
     }
 }
 

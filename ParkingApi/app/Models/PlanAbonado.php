@@ -15,11 +15,13 @@ class PlanAbonado extends Model
 
     protected $fillable = [
         'cliente_id',
+        'vehiculo_id', // <-- Faltaba este
         'tipo_plan',
         'duracion',
         'monto',
         'total',
-        'fecha_inicio'
+        'fecha_inicio',
+        'fecha_fin', // ← este campo está en la base de datos, debe estar aquí también
     ];
 
     public function cliente()

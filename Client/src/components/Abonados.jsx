@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
+import { toast } from "react-toastify";
+import SelectorTipoVehiculo from "./SelectorTipoVehiculo"; // <- IMPORTANTE
 
 const Abonados = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +20,7 @@ const Abonados = () => {
     total: "",
   });
 
+  const [tipoVehiculo, setTipoVehiculo] = useState(""); // <- NUEVO
   const [planes, setPlanes] = useState([]);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [idPlanEditando, setIdPlanEditando] = useState(null);
@@ -56,7 +59,7 @@ const Abonados = () => {
           params: { nombre: formData.nombre },
         });
       } else {
-        alert("Ingrese al menos un campo para buscar");
+        toast.error("Ingrese al menos un campo para buscar");
         return;
       }
 
@@ -74,7 +77,7 @@ const Abonados = () => {
       getPlanes(cliente.id);
     } catch (error) {
       console.error(error);
-      alert("Abonado no encontrado");
+      toast.error("Abonado no encontrado");
     }
   };
 
@@ -91,28 +94,32 @@ const Abonados = () => {
     e.preventDefault();
 
     try {
+      if (!tipoVehiculo) {
+        toast.error("Debe seleccionar el tipo de vehículo");
+        return;
+      }
+
       if (modoEdicion && idPlanEditando) {
-        // Editar plan existente
         await axios.put(`/api/planes-abonado/${idPlanEditando}`, {
           ...formData,
+          id_tipo_vehiculo: tipoVehiculo,
         });
-        alert("Plan actualizado correctamente");
+        toast.success("Plan actualizado correctamente");
         setModoEdicion(false);
         setIdPlanEditando(null);
       } else {
-        // Crear nuevo plan
         await axios.post("/api/cliente/abonado-plan", {
           ...formData,
-          id_tipo_vehiculo: 1,
+          id_tipo_vehiculo: tipoVehiculo,
         });
-        alert("Plan guardado correctamente");
+        toast.success("Plan guardado correctamente");
       }
 
-      buscarAbonado(); // Refrescar planes
+      buscarAbonado();
       resetFormulario();
     } catch (error) {
       console.error(error);
-      alert(error.response?.data?.error || "Error al guardar el plan");
+      toast.error(error.response?.data?.error || "Error al guardar el plan");
     }
   };
 
@@ -121,11 +128,11 @@ const Abonados = () => {
 
     try {
       await axios.delete(`/api/planes-abonado/${id}`);
-      alert("Plan eliminado");
+      toast.info("Plan eliminado");
       setPlanes((prev) => prev.filter((plan) => plan.id !== id));
     } catch (err) {
       console.error(err);
-      alert("Error al eliminar el plan");
+      toast.error("Error al eliminar el plan");
     }
   };
 
@@ -139,7 +146,7 @@ const Abonados = () => {
       fecha_inicio: plan.fecha_inicio,
       fecha_fin: plan.fecha_fin,
     });
-
+    setTipoVehiculo(plan.id_tipo_vehiculo); // <- NUEVO
     setModoEdicion(true);
     setIdPlanEditando(plan.id);
   };
@@ -154,6 +161,7 @@ const Abonados = () => {
       fecha_inicio: "",
       fecha_fin: "",
     }));
+    setTipoVehiculo(""); // <- NUEVO
     setModoEdicion(false);
     setIdPlanEditando(null);
   };
@@ -166,7 +174,6 @@ const Abonados = () => {
         <div className="m-auto w-full max-w-screen-lg p-4">
           <form className="space-y-6">
             <div className="grid grid-cols-4 gap-4">
-              {/* Abonado */}
               <input
                 name="nombre"
                 value={formData.nombre}
@@ -206,7 +213,6 @@ const Abonados = () => {
               </button>
             </div>
 
-            {/* Plan */}
             <div className="grid grid-cols-4 gap-4">
               <input
                 name="monto"
@@ -243,8 +249,10 @@ const Abonados = () => {
                 type="date"
                 name="fecha_fin"
                 value={formData.fecha_fin}
-                readOnly
+                onChange={handleChange}
+                min={formData.fecha_inicio}
               />
+
               <input
                 name="total"
                 value={formData.total}
@@ -252,6 +260,11 @@ const Abonados = () => {
                 placeholder="Total"
               />
             </div>
+
+            <SelectorTipoVehiculo
+              tipoSeleccionado={tipoVehiculo}
+              setTipoSeleccionado={setTipoVehiculo}
+            />
 
             <div className="text-right space-x-2">
               <button
@@ -273,7 +286,6 @@ const Abonados = () => {
             </div>
           </form>
 
-          {/* Tabla de Planes */}
           {planes.length > 0 && (
             <div className="mt-8">
               <h2 className="font-bold text-lg mb-2">Planes del Abonado</h2>

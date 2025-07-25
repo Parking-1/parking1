@@ -1,5 +1,6 @@
 import { useState } from "react";
-import axios from "axios";
+import { toast } from "react-toastify";
+import axios from "../config/axios-instance";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
@@ -25,13 +26,21 @@ const Pagos = () => {
   const buscarPagos = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post("/api/pagos/buscar", filtros, {
-        withCredentials: true, // incluye cookies JWT
+      const res = await axios.post("/pagos/buscar", filtros, {
+        withCredentials: true,
       });
-      setResultados(res.data.data);
+
+      if (res.data?.data) {
+        setResultados(res.data.data);
+        toast.success("Búsqueda completada");
+      } else {
+        toast.warn("No se encontraron resultados");
+        setResultados([]);
+      }
     } catch (error) {
-      console.error("Error buscando pagos:", error);
-      alert("Ocurrió un error al buscar los pagos.");
+      const msg =
+        error.response?.data?.error || error.message || "Error al buscar pagos";
+      toast.error(msg);
     }
   };
 
