@@ -3,7 +3,8 @@ import axios from "axios";
 import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 import { toast } from "react-toastify";
-import SelectorTipoVehiculo from "./SelectorTipoVehiculo"; // <- IMPORTANTE
+import SelectorTipoVehiculo from "./SelectorTipoVehiculo";
+import FormularioAbonado from "./FormularioAbonadoDias";
 
 const Abonados = () => {
   const [formData, setFormData] = useState({
@@ -20,11 +21,27 @@ const Abonados = () => {
     total: "",
   });
 
-  const [tipoVehiculo, setTipoVehiculo] = useState(""); // <- NUEVO
+  const [tipoVehiculo, setTipoVehiculo] = useState("");
   const [planes, setPlanes] = useState([]);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [idPlanEditando, setIdPlanEditando] = useState(null);
+  const [espaciosDisponibles, setEspaciosDisponibles] = useState(0);
 
+  // Cargar espacios disponibles una vez
+  useEffect(() => {
+    const fetchConfiguracion = async () => {
+      try {
+        const res = await axios.get("/api/configuracion");
+        setEspaciosDisponibles(res.data.espacios_disponibles || 0);
+      } catch (err) {
+        console.error("Error cargando configuración:", err);
+      }
+    };
+
+    fetchConfiguracion();
+  }, []);
+
+  // Calcular fecha_fin y total automáticamente
   useEffect(() => {
     const monto = parseFloat(formData.monto);
     const duracion = parseInt(formData.duracion);
@@ -44,6 +61,23 @@ const Abonados = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleRegistrarAbonado = async (data) => {
+    try {
+      await axios.post("/api/cliente/abonado-plan", {
+        ...formData,
+        ...data, // nombre, placa, documento, dias, total
+        tipo_plan: "diario",
+        id_tipo_vehiculo: tipoVehiculo,
+      });
+      toast.success("Plan diario registrado correctamente");
+      buscarAbonado();
+      resetFormulario();
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.error || "Error al registrar el plan");
+    }
   };
 
   const buscarAbonado = async () => {
@@ -146,22 +180,26 @@ const Abonados = () => {
       fecha_inicio: plan.fecha_inicio,
       fecha_fin: plan.fecha_fin,
     });
-    setTipoVehiculo(plan.id_tipo_vehiculo); // <- NUEVO
+    setTipoVehiculo(plan.id_tipo_vehiculo);
     setModoEdicion(true);
     setIdPlanEditando(plan.id);
   };
 
   const resetFormulario = () => {
-    setFormData((prev) => ({
-      ...prev,
-      tipo_plan: "",
-      duracion: "",
+    setFormData({
+      nombre: "",
+      apellido: "",
+      cedula: "",
+      placa: "",
+      telefono: "",
       monto: "",
-      total: "",
+      duracion: "",
+      tipo_plan: "",
       fecha_inicio: "",
       fecha_fin: "",
-    }));
-    setTipoVehiculo(""); // <- NUEVO
+      total: "",
+    });
+    setTipoVehiculo("");
     setModoEdicion(false);
     setIdPlanEditando(null);
   };
@@ -226,6 +264,9 @@ const Abonados = () => {
                 onChange={handleChange}
               >
                 <option value="">Duración</option>
+                <option value="1">1 día</option>
+                <option value="2">2 días</option>
+                <option value="3">3 días</option>
                 <option value="15">15 días</option>
                 <option value="30">30 días</option>
                 <option value="60">60 días</option>
@@ -236,6 +277,7 @@ const Abonados = () => {
                 onChange={handleChange}
               >
                 <option value="">Tipo</option>
+                <option value="diario">Diario</option>
                 <option value="semanal">Semanal</option>
                 <option value="mensual">Mensual</option>
               </select>
@@ -252,11 +294,11 @@ const Abonados = () => {
                 onChange={handleChange}
                 min={formData.fecha_inicio}
               />
-
               <input
                 name="total"
                 value={formData.total}
-                onChange={handleChange}
+                disabled
+                className="bg-gray-100"
                 placeholder="Total"
               />
             </div>
@@ -265,6 +307,14 @@ const Abonados = () => {
               tipoSeleccionado={tipoVehiculo}
               setTipoSeleccionado={setTipoVehiculo}
             />
+
+            {formData.tipo_plan === "diario" && (
+              <FormularioAbonado
+                tarifaDia={10000}
+                espaciosDisponibles={espaciosDisponibles}
+                onRegistrar={handleRegistrarAbonado}
+              />
+            )}
 
             <div className="text-right space-x-2">
               <button

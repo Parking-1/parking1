@@ -11,6 +11,8 @@ use App\Http\Controllers\PlanAbonadoController;
 use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ParqueaderoController;
+use App\Http\Controllers\ConfiguracionController;
+
 
 // Rutas de vehículos
 Route::prefix("vehiculo")->middleware('jwt.cookie')->group(function () {
@@ -124,6 +126,7 @@ Route::post('/reportes/pdf', [ReporteController::class, 'generarPDF'])->middlewa
 Route::middleware(['auth:api', 'jwt.cookie'])->group(function () {
     Route::get('/configuracion', [ConfiguracionController::class, 'index']);
     Route::put('/configuracion', [ConfiguracionController::class, 'update']);
+    Route::get('/configuracion/resumen', [ConfiguracionController::class, 'resumen']);
 });
 
 Route::get('/ticket/pdf/{ticketId}', [TicketController::class, 'generarPDF']);
@@ -135,3 +138,5 @@ Route::get('/planes-abonado/{clienteId}', [ClienteController::class, 'getPlanesP
 Route::get('/planes-abonado', [ClienteController::class, 'getPlanes']); // todos los planes
 Route::put('/planes-abonado/{id}', [ClienteController::class, 'actualizarPlan']);
 Route::delete('/planes-abonado/{id}', [ClienteController::class, 'eliminarPlan']);
+
+Route::post('/configuracion/liberar-espacio', [ConfiguracionController::class, 'liberarEspacio']);

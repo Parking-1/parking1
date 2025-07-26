@@ -15,9 +15,10 @@ class CargoSeeder extends Seeder
     public function run()
     {
         Cargo::insert([
-            ["nombre" => "vigilante"],
-            ["nombre" => "administrador"],
-            ["nombre" => "encargado"]
-        ]);
+    ["id" => 1, "nombre" => "vigilante"],
+    ["id" => 2, "nombre" => "administrador"],
+    ["id" => 3, "nombre" => "encargado"]
+]);
+
     }
 }

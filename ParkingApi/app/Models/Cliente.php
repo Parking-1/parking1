@@ -27,5 +27,10 @@ class Cliente extends Model
     return $this->hasMany(PlanAbonado::class, 'cliente_id');
 }
 
+public function pagos()
+{
+    return $this->hasMany(Pago::class);
+}
+
 }
 

@@ -31,6 +31,21 @@ const ResumenParqueadero = forwardRef((props, ref) => {
     refetch: fetchResumen,
   }));
 
+  const handleLiberarEspacio = async () => {
+    try {
+      const response = await axios.post(
+        "/configuracion/liberar-espacio",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+      await fetchResumen(); // Refresca datos después de liberar
+    } catch (error) {
+      console.error("Error al liberar espacio", error);
+    }
+  };
+
   return (
     <div className="bg-white rounded shadow p-4 mb-6 w-full max-w-4xl">
       <h2 className="text-lg font-bold mb-2">Resumen del Parqueadero</h2>
@@ -53,6 +68,14 @@ const ResumenParqueadero = forwardRef((props, ref) => {
           </div>
           <div>Disponibles</div>
         </div>
+      </div>
+      <div className="mt-4 text-center">
+        <button
+          onClick={handleLiberarEspacio}
+          className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
+        >
+          Liberar espacio
+        </button>
       </div>
     </div>
   );

@@ -114,79 +114,86 @@ class ClienteController extends Controller
     }
 
     public function SavePlanAbonado(Request $request): JsonResponse
-    {
-        $request->validate([
-            'nombre'       => 'required|string|max:50',
-            'apellido'     => 'required|string|max:50',
-            'cedula'       => 'required|string|max:50',
-            'telefono'     => 'required|string|max:50',
-            'tipo_plan'    => 'required|string',
-            'duracion'     => 'required|integer',
-            'monto'        => 'required|numeric',
-            'total'        => 'required|numeric',
-            'fecha_inicio' => 'required|date',
-        ]);
+{
+    $request->validate([
+        'nombre'       => 'required|string|max:50',
+        'apellido'     => 'required|string|max:50',
+        'cedula'       => 'required|string|max:50',
+        'telefono'     => 'required|string|max:50',
+        'tipo_plan'    => 'required|string',
+        'duracion'     => 'required|integer|min:1',
+        'monto'        => 'required|numeric|min:0',
+        'total'        => 'required|numeric|min:0',
+        'fecha_inicio' => 'required|date',
+    ]);
 
-        try {
-            DB::transaction(function () use ($request) {
-                $cliente = Cliente::firstOrCreate(
-                    ['cedula' => $request->cedula],
-                    [
-                        'nombre'   => $request->nombre,
-                        'apellido' => $request->apellido,
-                        'telefono' => $request->telefono,
-                    ]
-                );
+    try {
+        DB::transaction(function () use ($request) {
+            $config = Configuracion::first();
 
-                $tienePlanActivo = $cliente->planes()
-                    ->whereDate('fecha_fin', '>=', now())
-                    ->exists();
+            if ($config && $config->espacios_disponibles <= 0) {
+                throw new \Exception('No hay espacios disponibles para asignar este plan.');
+            }
 
-                if ($tienePlanActivo) {
-                    throw new Exception('Este cliente ya tiene un plan activo.');
-                }
+            $cliente = Cliente::firstOrCreate(
+                ['cedula' => $request->cedula],
+                [
+                    'nombre'   => $request->nombre,
+                    'apellido' => $request->apellido,
+                    'telefono' => $request->telefono,
+                ]
+            );
 
-                $vehiculoId = null;
-                if ($request->filled('placa')) {
-                    $vehiculo = $cliente->vehiculo()->firstOrCreate([
-                        'placa'            => strtoupper($request->placa),
-                        'id_tipo_vehiculo' => $request->id_tipo_vehiculo ?? 1,
-                    ]);
-                    $vehiculoId = $vehiculo->id;
-                }
+            $tienePlanActivo = $cliente->planes()
+                ->whereDate('fecha_fin', '>=', now())
+                ->exists();
 
-                $fechaFin = Carbon::parse($request->fecha_inicio)->addDays($request->duracion);
+            if ($tienePlanActivo) {
+                throw new \Exception('Este cliente ya tiene un plan activo.');
+            }
 
-                $cliente->planes()->create([
-                    'tipo_plan'    => $request->tipo_plan,
-                    'duracion'     => $request->duracion,
-                    'monto'        => $request->monto,
-                    'total'        => $request->total,
-                    'fecha_inicio' => $request->fecha_inicio,
-                    'fecha_fin'    => $fechaFin,
-                    'vehiculo_id'  => $vehiculoId, // ✅ aquí se guarda el ID
+            $vehiculoId = null;
+            if ($request->filled('placa')) {
+                $vehiculo = $cliente->vehiculo()->firstOrCreate([
+                    'placa'            => strtoupper($request->placa),
+                    'id_tipo_vehiculo' => $request->id_tipo_vehiculo ?? 1,
                 ]);
+                $vehiculoId = $vehiculo->id;
+            }
 
-                // Restar espacio disponible
-                $config = Configuracion::first();
+            $fechaFin = Carbon::parse($request->fecha_inicio)->addDays($request->duracion);
 
-                 // ✅ Agrega esta validación justo aquí:
-    if ($config && $config->espacios_disponibles <= 0) {
-        throw new \Exception('No hay espacios disponibles para asignar este plan.');
+            $cliente->planes()->create([
+                'tipo_plan'    => $request->tipo_plan,
+                'duracion'     => $request->duracion,
+                'monto'        => $request->monto,
+                'total'        => $request->total,
+                'fecha_inicio' => $request->fecha_inicio,
+                'fecha_fin'    => $fechaFin,
+                'vehiculo_id'  => $vehiculoId,
+            ]);
+
+            DB::table('pagos')->insert([
+                'cliente_id'  => $cliente->id,
+                'monto'       => $request->total,
+                'fecha_pago'  => now(),
+                'descripcion' => 'Pago por ' . $request->duracion . ' día(s) de plan abonado',
+            ]);
+
+            if ($config) {
+                $config->espacios_disponibles = max(0, $config->espacios_disponibles - 1);
+                $config->save();
+            }
+        });
+
+        return response()->json(['message' => 'Plan del abonado guardado'], 201);
+    } catch (Exception $e) {
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
 
-    
-                if ($config && $config->espacios_disponibles > 0) {
-                    $config->espacios_disponibles -= 1;
-                    $config->save();
-                }
-            });
 
-            return response()->json(['message' => 'Plan del abonado guardado'], 201);
-        } catch (Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
-    }
+
 
     public function tienePlanActivo($id): JsonResponse
 {

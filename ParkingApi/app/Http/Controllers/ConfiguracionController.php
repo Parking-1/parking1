@@ -38,17 +38,39 @@ class ConfiguracionController extends Controller
 
     public function resumen(): JsonResponse
     {
-        $total = Configuracion::value('espacios_totales');
+        $total = Configuracion::value('capacidad_total');
         $disponibles = Configuracion::value('espacios_disponibles');
         $abonados = PlanAbonado::whereDate('fecha_fin', '>=', now())->count();
         $ocupados = $total - $disponibles;
 
         return response()->json([
-            'espacios_totales' => $total,
+            'capacidad_total' => $total,
             'espacios_disponibles' => $disponibles,
             'abonados' => $abonados,
             'ocupados' => $ocupados,
         ]);
     }
+
+    public function liberarEspacio(): JsonResponse
+{
+    try {
+        $config = Configuracion::first();
+
+        if (!$config) {
+            return response()->json(['error' => 'Configuración no encontrada.'], 404);
+        }
+
+        if ($config->espacios_disponibles < $config->capacidad_total) {
+            $config->espacios_disponibles += 1;
+            $config->save();
+            return response()->json(['message' => 'Espacio liberado exitosamente.']);
+        }
+
+        return response()->json(['message' => 'Ya están disponibles todos los espacios.'], 400);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Error al liberar espacio.'], 500);
+    }
+}
+
 }
 
