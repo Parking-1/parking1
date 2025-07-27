@@ -7,15 +7,23 @@ import Cashbox from "../../assets/Cashbox.png";
 import Footer from "../../components/Footer";
 import { Link } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const { user, isAuthenticated, logout, authLoading } = useAuth();
+  const navigate = useNavigate(); // 👈 nuevo
 
   if (authLoading) return <p>Cargando...</p>;
 
   if (!isAuthenticated) {
-    return <p>No estás autenticado</p>;
+    navigate("/login"); // 👈 redirige al login si no autenticado
+    return null;
   }
+
+  const handleLogout = async () => {
+    await logout(); // limpia sesión
+    navigate("/"); // redirige al login
+  };
 
   return (
     <>
@@ -24,7 +32,7 @@ const Home = () => {
         <div className="flex justify-between items-center px-6 py-4">
           <h2 className="text-xl font-semibold">Bienvenido, {user.name}</h2>
           <button
-            onClick={logout}
+            onClick={handleLogout}
             className="bg-red-500 text-white px-4 py-1 rounded hover:bg-red-600 transition"
           >
             Cerrar sesión

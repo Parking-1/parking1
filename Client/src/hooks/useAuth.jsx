@@ -33,7 +33,7 @@ const useAuth = () => {
       toast.error("Error al cerrar sesión", { theme: "dark" });
     } finally {
       setUser(null);
-      navigate("/"); // Redirigir al login
+      navigate("/login"); // Redirigir al login
     }
   };
 
