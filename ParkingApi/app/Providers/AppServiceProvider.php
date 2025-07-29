@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Interface\IPdf;
 use App\Service\Pdf;
+use App\Services\Facturacion\ProveedorInterface;
+use App\Services\Facturacion\MockProveedor;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,6 +18,10 @@ class AppServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->bind(IPdf::class, Pdf::class);
+        $this->app->bind(ProveedorInterface::class, function ($app) {
+            // Aquí podrías usar lógica para decidir qué proveedor usar
+            return new MockProveedor();
+        });
     }
 
     /**

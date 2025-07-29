@@ -52,6 +52,12 @@
 
     <p><strong>Lavado:</strong> {{ $transaccion->lavado ? 'Sí' : 'No' }}</p>
 
+    @if(isset($respuesta['cufe']))
+    <p>CUFE: {{ $respuesta['cufe'] }}</p>
+    <p>Validado: {{ $respuesta['fecha_validacion'] }}</p>
+@endif
+
+
     <div class="line"></div>
 
     <div class="footer">

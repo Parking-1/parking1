@@ -1,0 +1,35 @@
+$factura = new SimpleXMLElement('<Factura></Factura>');
+
+// Emisor
+$emisorXML = $factura->addChild('Emisor');
+$emisorXML->addChild('Nombre', htmlspecialchars($emisor['nombre']));
+$emisorXML->addChild('NIT', htmlspecialchars($emisor['nit']));
+$emisorXML->addChild('Direccion', isset($emisor['direccion']) ? htmlspecialchars($emisor['direccion']) : '');
+
+// Receptor
+$receptorXML = $factura->addChild('Receptor');
+$receptorXML->addChild('Nombre', htmlspecialchars($receptor['nombre']));
+$receptorXML->addChild('NIT', htmlspecialchars($receptor['nit']));
+$receptorXML->addChild('Direccion', htmlspecialchars($receptor['direccion']));
+
+// Detalle de items
+$detalle = $factura->addChild('Detalle');
+
+foreach ($items as $item) {
+    $itemXML = $detalle->addChild('Item');
+    $itemXML->addChild('Descripcion', htmlspecialchars($item['descripcion']));
+    $itemXML->addChild('Cantidad', $item['cantidad']);
+    $itemXML->addChild('PrecioUnitario', $item['precio_unitario']);
+    $itemXML->addChild('Total', $item['total']);
+}
+
+// Totales y metadatos
+$factura->addChild('Total', $total);
+$factura->addChild('Fecha', $fecha);
+$factura->addChild('FormaPago', $forma_pago);
+
+// Mostrar o guardar el XML
+Header('Content-type: text/xml'); // Opcional, si lo quieres ver en navegador como XML
+echo $factura->asXML();
+
+
