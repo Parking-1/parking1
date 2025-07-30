@@ -12,6 +12,7 @@ use App\Http\Controllers\ReporteController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\ParqueaderoController;
 use App\Http\Controllers\ConfiguracionController;
+use App\Http\Controllers\FacturaMockController;
 
 
 // Rutas de vehículos
@@ -140,3 +141,22 @@ Route::put('/planes-abonado/{id}', [ClienteController::class, 'actualizarPlan'])
 Route::delete('/planes-abonado/{id}', [ClienteController::class, 'eliminarPlan']);
 
 Route::post('/configuracion/liberar-espacio', [ConfiguracionController::class, 'liberarEspacio']);
+
+//Route::get('/factura-mock', [FacturaController::class, 'pruebaMockFactura']);
+
+Route::get('/prueba-factura', [App\Http\Controllers\FacturaMockController::class, 'pruebaMockFactura']);
+
+Route::get('/mock/factura/firmar', [FacturaMockController::class, 'firmarXmlDePrueba']);
+
+Route::get('/ver-factura', function () {
+    $ruta = storage_path('app/facturas/factura_mock_firmada.xml');
+    if (!file_exists($ruta)) {
+        abort(404, 'Archivo firmado no encontrado');
+    }
+    return response()->file($ruta, ['Content-Type' => 'application/xml']);
+});
+
+
+
+Route::get('/generar-factura', [FacturaMockController::class, 'pruebaMockFactura']);
+Route::get('/firmar-factura', [FacturaMockController::class, 'firmarXmlDePrueba']);
