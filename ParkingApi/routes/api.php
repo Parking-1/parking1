@@ -13,6 +13,8 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ParqueaderoController;
 use App\Http\Controllers\ConfiguracionController;
 use App\Http\Controllers\FacturaMockController;
+use App\Http\Controllers\FacturaController;
+use App\Http\Controllers\TicketController;
 
 
 // Rutas de vehículos
@@ -158,5 +160,7 @@ Route::get('/ver-factura', function () {
 
 
 
-Route::get('/generar-factura', [FacturaMockController::class, 'pruebaMockFactura']);
+//Route::get('/generar-factura', [FacturaMockController::class, 'pruebaMockFactura']);
 Route::get('/firmar-factura', [FacturaMockController::class, 'firmarXmlDePrueba']);
+Route::get('/generar-factura', [FacturaController::class, 'generarFactura']);
+Route::get('/factura/generar', [FacturaController::class, 'generar']);

@@ -1,5 +1,5 @@
 <?php
-namespace App\Service;
+namespace App\Services;
 
 use App\Interface\IPdf;
 use Illuminate\Http\Response;

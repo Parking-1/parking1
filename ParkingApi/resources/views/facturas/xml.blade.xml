@@ -1,35 +1,39 @@
-$factura = new SimpleXMLElement('<Factura></Factura>');
+<?php
 
-// Emisor
-$emisorXML = $factura->addChild('Emisor');
-$emisorXML->addChild('Nombre', htmlspecialchars($emisor['nombre']));
-$emisorXML->addChild('NIT', htmlspecialchars($emisor['nit']));
-$emisorXML->addChild('Direccion', isset($emisor['direccion']) ? htmlspecialchars($emisor['direccion']) : '');
+function generarXmlFactura(array $emisor, array $receptor, array $items, $total, $fecha, $forma_pago): string
+{
+    $factura = new SimpleXMLElement('<Factura></Factura>');
 
-// Receptor
-$receptorXML = $factura->addChild('Receptor');
-$receptorXML->addChild('Nombre', htmlspecialchars($receptor['nombre']));
-$receptorXML->addChild('NIT', htmlspecialchars($receptor['nit']));
-$receptorXML->addChild('Direccion', htmlspecialchars($receptor['direccion']));
+    // Emisor
+    $emisorXML = $factura->addChild('Emisor');
+    $emisorXML->addChild('Nombre', htmlspecialchars($emisor['nombre'] ?? ''));
+    $emisorXML->addChild('NIT', htmlspecialchars($emisor['nit'] ?? ''));
+    $emisorXML->addChild('Direccion', htmlspecialchars($emisor['direccion'] ?? ''));
 
-// Detalle de items
-$detalle = $factura->addChild('Detalle');
+    // Receptor
+    $receptorXML = $factura->addChild('Receptor');
+    $receptorXML->addChild('Nombre', htmlspecialchars($receptor['nombre'] ?? ''));
+    $receptorXML->addChild('NIT', htmlspecialchars($receptor['nit'] ?? ''));
+    $receptorXML->addChild('Direccion', htmlspecialchars($receptor['direccion'] ?? ''));
 
-foreach ($items as $item) {
-    $itemXML = $detalle->addChild('Item');
-    $itemXML->addChild('Descripcion', htmlspecialchars($item['descripcion']));
-    $itemXML->addChild('Cantidad', $item['cantidad']);
-    $itemXML->addChild('PrecioUnitario', $item['precio_unitario']);
-    $itemXML->addChild('Total', $item['total']);
+    // Detalle de Items
+    $detalle = $factura->addChild('Detalle');
+    foreach ($items as $item) {
+        $itemXML = $detalle->addChild('Item');
+        $itemXML->addChild('Descripcion', htmlspecialchars($item['descripcion'] ?? ''));
+        $itemXML->addChild('Cantidad', (int) ($item['cantidad'] ?? 0));
+        $itemXML->addChild('PrecioUnitario', number_format((float) ($item['precio_unitario'] ?? 0), 2, '.', ''));
+        $itemXML->addChild('Total', number_format((float) ($item['total'] ?? 0), 2, '.', ''));
+    }
+
+    // Totales y Metadatos
+    $factura->addChild('Total', number_format((float) $total, 2, '.', ''));
+    $factura->addChild('Fecha', htmlspecialchars($fecha));
+    $factura->addChild('FormaPago', htmlspecialchars($forma_pago));
+
+    // Retornar XML como string
+    return $factura->asXML();
 }
 
-// Totales y metadatos
-$factura->addChild('Total', $total);
-$factura->addChild('Fecha', $fecha);
-$factura->addChild('FormaPago', $forma_pago);
-
-// Mostrar o guardar el XML
-Header('Content-type: text/xml'); // Opcional, si lo quieres ver en navegador como XML
-echo $factura->asXML();
 
 

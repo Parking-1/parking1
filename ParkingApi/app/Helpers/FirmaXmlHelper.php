@@ -4,29 +4,48 @@ namespace App\Helpers;
 
 class FirmaXmlHelper
 {
-    public static function firmarXml($xmlSinFirmar)
+    public static function firmarXml(string $xmlSinFirmar): string
     {
         $certificadoPath = storage_path('app/certs/certificate.crt');
         $clavePrivadaPath = storage_path('app/certs/private.key');
 
-        // Cargar certificado y clave
+        // Validar existencia de archivos
+        if (!file_exists($certificadoPath) || !file_exists($clavePrivadaPath)) {
+            throw new \Exception("Certificado o clave privada no encontrados.");
+        }
+
+        // Cargar contenido de certificado y clave
         $certificado = file_get_contents($certificadoPath);
         $clavePrivada = file_get_contents($clavePrivadaPath);
 
-        // Crear una nueva instancia DOMDocument
-        $dom = new \DOMDocument();
-        $dom->loadXML($xmlSinFirmar);
+        if ($certificado === false || $clavePrivada === false) {
+            throw new \Exception("Error al leer los archivos de certificado o clave.");
+        }
 
-        // Canonicalización
+        // Cargar XML en DOMDocument
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+
+        if (!$dom->loadXML($xmlSinFirmar)) {
+            throw new \Exception("El XML proporcionado no es válido.");
+        }
+
+        // Canonicalizar contenido
         $data = $dom->C14N();
 
-        // Firmar los datos
-        openssl_sign($data, $firmaBinaria, $clavePrivada, OPENSSL_ALGO_SHA256);
+        // Firmar el contenido
+        $firmaBinaria = null;
+        if (!openssl_sign($data, $firmaBinaria, $clavePrivada, OPENSSL_ALGO_SHA256)) {
+            throw new \Exception("Error al firmar el XML.");
+        }
+
         $firmaBase64 = base64_encode($firmaBinaria);
 
-        // Agregar la firma al XML
+        // Agregar nodo <Firma> al XML
         $firmaElement = $dom->createElement("Firma", $firmaBase64);
         $dom->documentElement->appendChild($firmaElement);
 
         return $dom->saveXML();
-    }}
+    }
+}
